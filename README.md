@@ -76,3 +76,9 @@ Los directorios todavía vacíos contienen un archivo `.gitkeep` para conservarl
 ## Variables de entorno
 
 Los archivos `.env` locales están excluidos de Git para evitar publicar información sensible. Cuando el proyecto necesite configuración por variables de entorno, se deberá documentar un archivo `.env.example` sin credenciales reales.
+
+## Navegación demo y control de acceso
+
+React Router registra las vistas aprobadas de nave, Tierra, Mission Control y evidencia. La selección «Cambiar entorno demo» modifica únicamente el contexto visual y el menú mostrado; no autentica, autoriza ni protege información.
+
+Todas las rutas del frontend pueden abrirse directamente durante el prototipo. Cuando FastAPI esté disponible, el backend debe aplicar autenticación, autorización y separación de datos para cada operación. Nunca se debe confiar en el rol almacenado en el navegador como barrera de seguridad.
