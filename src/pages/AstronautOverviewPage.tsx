@@ -1,6 +1,9 @@
 import { ArrowRight, ClipboardList, History, Upload } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import { EarthMessagesPanel } from '../components/dashboard/EarthMessagesPanel'
+import { LinkModeBadge, LinkStatus } from '../components/dashboard/LinkStatus'
+import { NoticesPanel } from '../components/dashboard/NoticesPanel'
 import { PageHeader } from '../components/layout/PageHeader'
 import {
   EmptyState,
@@ -10,8 +13,8 @@ import {
   MissionPhaseBadge,
   TimeStamp,
 } from '../components/ui'
-import { getDataProvider } from '../services'
-import type { Astronaut, Overview, OverviewCard } from '../types'
+import { getDataProvider, type ShipInbox } from '../services'
+import type { Astronaut, Overview, OverviewCard, SimulatorStatus } from '../types'
 
 interface DashboardData {
   astronaut: Astronaut
@@ -23,6 +26,11 @@ type DashboardState =
   | { status: 'empty' }
   | { status: 'error'; message: string }
   | { status: 'ready'; data: DashboardData }
+
+type RemoteState<T> =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'ready'; data: T }
 
 const actionLinkClassName =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-nasa-blue hover:text-nasa-blue'
@@ -91,10 +99,24 @@ function DashboardMetricCard({ card, phase }: { card: OverviewCard; phase: Overv
 export function AstronautOverviewPage() {
   const [state, setState] = useState<DashboardState>({ status: 'loading' })
   const [requestVersion, setRequestVersion] = useState(0)
+  const [linkState, setLinkState] = useState<RemoteState<SimulatorStatus>>({ status: 'loading' })
+  const [linkRequestVersion, setLinkRequestVersion] = useState(0)
+  const [inboxState, setInboxState] = useState<RemoteState<ShipInbox>>({ status: 'loading' })
+  const [inboxRequestVersion, setInboxRequestVersion] = useState(0)
 
   const loadDashboard = useCallback(() => {
     setState({ status: 'loading' })
     setRequestVersion((current) => current + 1)
+  }, [])
+
+  const loadLinkStatus = useCallback(() => {
+    setLinkState({ status: 'loading' })
+    setLinkRequestVersion((current) => current + 1)
+  }, [])
+
+  const loadInbox = useCallback(() => {
+    setInboxState({ status: 'loading' })
+    setInboxRequestVersion((current) => current + 1)
   }, [])
 
   useEffect(() => {
@@ -124,6 +146,40 @@ export function AstronautOverviewPage() {
       isCurrent = false
     }
   }, [requestVersion])
+
+  useEffect(() => {
+    let isCurrent = true
+
+    getDataProvider()
+      .getSimulatorStatus()
+      .then((status) => {
+        if (isCurrent) setLinkState({ status: 'ready', data: status })
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) setLinkState({ status: 'error', message: getErrorMessage(error) })
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [linkRequestVersion])
+
+  useEffect(() => {
+    let isCurrent = true
+
+    getDataProvider()
+      .getShipInbox()
+      .then((inbox) => {
+        if (isCurrent) setInboxState({ status: 'ready', data: inbox })
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) setInboxState({ status: 'error', message: getErrorMessage(error) })
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [inboxRequestVersion])
 
   if (state.status === 'loading') {
     return (
@@ -178,11 +234,14 @@ export function AstronautOverviewPage() {
         title="Panel del astronauta"
         description={`${astronaut.display_name} · ${astronaut.id}`}
         badge={
-          showDemoBadge ? (
-            <span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">
-              DATOS SINTÉTICOS · DEMO
-            </span>
-          ) : undefined
+          <>
+            {showDemoBadge && (
+              <span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">
+                DATOS SINTÉTICOS · DEMO
+              </span>
+            )}
+            {linkState.status === 'ready' && <LinkModeBadge mode={linkState.data.mode} />}
+          </>
         }
         actions={
           <>
@@ -245,6 +304,24 @@ export function AstronautOverviewPage() {
             />
           </div>
         )}
+      </section>
+
+      <NoticesPanel notices={overview.notices} />
+
+      <section className="grid gap-4 xl:grid-cols-2" aria-label="Enlace y mensajes con Tierra">
+        <LinkStatus
+          status={linkState.status === 'ready' ? linkState.data : undefined}
+          loading={linkState.status === 'loading'}
+          error={linkState.status === 'error' ? linkState.message : undefined}
+          lastEarthSyncAt={overview.last_earth_sync_at_utc}
+          onRetry={loadLinkStatus}
+        />
+        <EarthMessagesPanel
+          inbox={inboxState.status === 'ready' ? inboxState.data : undefined}
+          loading={inboxState.status === 'loading'}
+          error={inboxState.status === 'error' ? inboxState.message : undefined}
+          onRetry={loadInbox}
+        />
       </section>
 
       <Link

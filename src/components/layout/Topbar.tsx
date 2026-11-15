@@ -1,4 +1,4 @@
-import { Menu, WifiOff } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import type { RefObject } from 'react'
 import { Link } from 'react-router'
 import { environmentConfig, type ShellEnvironment } from './navigation'
@@ -18,8 +18,6 @@ interface TopbarProps {
 
 export function Topbar({ environment, title, breadcrumb, onOpenMenu, menuButtonRef }: TopbarProps) {
   const config = environmentConfig[environment]
-  const showOffline = environment !== 'earth'
-
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-card/95 backdrop-blur">
       <div className="flex min-h-20 items-center gap-3 px-4 sm:px-6 lg:px-8">
@@ -52,16 +50,6 @@ export function Topbar({ environment, title, breadcrumb, onOpenMenu, menuButtonR
           </nav>
           <p className="truncate text-base font-semibold text-ink sm:mt-1">{title}</p>
         </div>
-
-        {showOffline && (
-          <div
-            className="hidden min-h-9 items-center gap-2 rounded-full border border-notice/35 bg-notice/10 px-3 text-xs font-semibold text-ink xl:flex"
-            aria-label="Estado del enlace: sin conexión; no representa un estado médico"
-          >
-            <WifiOff aria-hidden="true" className="size-4 text-notice" />
-            Enlace sin conexión
-          </div>
-        )}
 
         <div className="hidden items-center gap-3 border-l border-line pl-4 sm:flex">
           <div className="hidden text-right lg:block">
