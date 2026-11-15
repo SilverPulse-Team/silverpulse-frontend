@@ -37,7 +37,7 @@ export function NoticesPanel({ notices }: { notices: Notice[] }) {
           />
         </div>
       ) : (
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="mt-4 grid gap-4">
           {notices.map((notice, noticeIndex) => (
             <AlertNotice
               key={`${notice.status}-${notice.reason_codes.join('-')}-${noticeIndex}`}

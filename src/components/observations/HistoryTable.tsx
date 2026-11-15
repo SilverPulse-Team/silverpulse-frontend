@@ -43,7 +43,7 @@ const phaseOptions: Array<{ value: MissionPhase; label: string }> = [
 ]
 
 const fieldClassName =
-  'mt-1.5 min-h-11 w-full rounded-control border border-line bg-card px-3 text-sm text-ink focus:border-nasa-blue'
+  'sp-field mt-1.5 w-full rounded-control border border-line bg-card px-3 text-sm text-ink transition-colors hover:border-slate-400 focus:border-nasa-blue'
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'No fue posible consultar el historial de observaciones.'
@@ -222,11 +222,11 @@ export function HistoryTable({ astronautId, metrics }: HistoryTableProps) {
             <p className="text-sm text-muted" aria-live="polite">
               Mostrando {firstVisible}–{lastVisible} de {data.total} · límite {data.limit} · desplazamiento {data.offset}
             </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="text-sm font-medium text-ink">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+              <label className="col-span-2 flex items-center justify-between text-sm font-medium text-ink sm:col-span-1 sm:justify-start">
                 Por página
                 <select
-                  className="ml-2 min-h-11 rounded-control border border-line bg-card px-3"
+                  className="sp-field ml-2 w-20 rounded-control border border-line bg-card px-3 text-sm transition-colors hover:border-slate-400 focus:border-nasa-blue"
                   value={limit}
                   onChange={(event) => {
                     setState({ status: 'loading' })
@@ -241,6 +241,7 @@ export function HistoryTable({ astronautId, metrics }: HistoryTableProps) {
               </label>
               <SecondaryButton
                 type="button"
+                className="w-full sm:w-auto"
                 disabled={!hasPrevious}
                 onClick={() => {
                   setState({ status: 'loading' })
@@ -251,6 +252,7 @@ export function HistoryTable({ astronautId, metrics }: HistoryTableProps) {
               </SecondaryButton>
               <SecondaryButton
                 type="button"
+                className="w-full sm:w-auto"
                 disabled={!hasNext}
                 onClick={() => {
                   setState({ status: 'loading' })

@@ -1,4 +1,4 @@
-import { ArrowRight, ClipboardList, History, Upload } from 'lucide-react'
+import { ClipboardList, History, Upload } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { EarthMessagesPanel } from '../components/dashboard/EarthMessagesPanel'
@@ -229,54 +229,65 @@ export function AstronautOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Entorno nave"
-        title="Panel del astronauta"
-        description={`${astronaut.display_name} · ${astronaut.id}`}
-        badge={
-          <>
-            {showDemoBadge && (
-              <span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">
-                DATOS SINTÉTICOS · DEMO
-              </span>
-            )}
-            {linkState.status === 'ready' && <LinkModeBadge mode={linkState.data.mode} />}
-          </>
-        }
-        actions={
-          <>
-            <Link className={actionLinkClassName} to="/astronaut/import">
-              <Upload aria-hidden="true" className="size-4" />
-              Importar datos
-            </Link>
-            <Link className={actionLinkClassName} to="/astronaut/trends">
-              <History aria-hidden="true" className="size-4" />
-              Ver tendencias
-            </Link>
-            <Link className={actionLinkClassName} to="/astronaut/return">
-              <ClipboardList aria-hidden="true" className="size-4" />
-              Explorar retorno
-            </Link>
-          </>
-        }
-      />
-
       <section
-        aria-label="Contexto de misión"
-        className="grid gap-4 rounded-card border border-line bg-card p-5 shadow-card sm:grid-cols-3"
+        aria-label="Encabezado operativo del astronauta"
+        className="rounded-card border border-line bg-card p-5 shadow-card lg:p-6"
       >
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Misión ficticia</p>
-          <p className="mt-2 text-base font-semibold text-ink">{astronaut.mission_id}</p>
+        <PageHeader
+          eyebrow="Entorno nave"
+          title="Panel del astronauta"
+          description={`Monitoreo biomédico y funcional personal a bordo · ${astronaut.display_name} · ${astronaut.id}`}
+          badge={
+            <>
+              {showDemoBadge && (
+                <span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">
+                  DATOS SINTÉTICOS · DEMO
+                </span>
+              )}
+              {linkState.status === 'ready' && <LinkModeBadge mode={linkState.data.mode} />}
+            </>
+          }
+          actions={
+            <>
+              <Link className={actionLinkClassName} to="/astronaut/import">
+                <Upload aria-hidden="true" className="size-4" />
+                Importar datos
+              </Link>
+              <Link className={actionLinkClassName} to="/astronaut/trends">
+                <History aria-hidden="true" className="size-4" />
+                Ver tendencias
+              </Link>
+              <Link className={actionLinkClassName} to="/astronaut/return">
+                <ClipboardList aria-hidden="true" className="size-4" />
+                Explorar retorno
+              </Link>
+            </>
+          }
+        />
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Misión ficticia</p>
+            <p className="mt-2 font-mono text-base font-semibold text-ink">{astronaut.mission_id}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Fase actual</p>
+            <div className="mt-2"><MissionPhaseBadge phase={overview.mission_phase} /></div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Último dato en UTC</p>
+            <TimeStamp value={lastObservation} label="Última observación" className="mt-2 block font-mono" />
+          </div>
         </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Fase actual</p>
-          <div className="mt-2"><MissionPhaseBadge phase={overview.mission_phase} /></div>
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Último dato en UTC</p>
-          <TimeStamp value={lastObservation} label="Última observación" className="mt-2 block" />
-        </div>
+
+        <LinkStatus
+          embedded
+          status={linkState.status === 'ready' ? linkState.data : undefined}
+          loading={linkState.status === 'loading'}
+          error={linkState.status === 'error' ? linkState.message : undefined}
+          lastEarthSyncAt={overview.last_earth_sync_at_utc}
+          onRetry={loadLinkStatus}
+        />
       </section>
 
       <section aria-labelledby="dashboard-metrics-title">
@@ -306,16 +317,8 @@ export function AstronautOverviewPage() {
         )}
       </section>
 
-      <NoticesPanel notices={overview.notices} />
-
-      <section className="grid gap-4 xl:grid-cols-2" aria-label="Enlace y mensajes con Tierra">
-        <LinkStatus
-          status={linkState.status === 'ready' ? linkState.data : undefined}
-          loading={linkState.status === 'loading'}
-          error={linkState.status === 'error' ? linkState.message : undefined}
-          lastEarthSyncAt={overview.last_earth_sync_at_utc}
-          onRetry={loadLinkStatus}
-        />
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]" aria-label="Avisos y mensajes">
+        <NoticesPanel notices={overview.notices} />
         <EarthMessagesPanel
           inbox={inboxState.status === 'ready' ? inboxState.data : undefined}
           loading={inboxState.status === 'loading'}
@@ -323,14 +326,6 @@ export function AstronautOverviewPage() {
           onRetry={loadInbox}
         />
       </section>
-
-      <Link
-        to="/astronaut/trends"
-        className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-nasa-blue hover:text-deep-space"
-      >
-        Consultar detalle longitudinal
-        <ArrowRight aria-hidden="true" className="size-4" />
-      </Link>
     </div>
   )
 }

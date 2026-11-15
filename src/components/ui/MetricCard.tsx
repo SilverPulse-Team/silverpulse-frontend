@@ -38,7 +38,7 @@ export function MetricCard(props: MetricCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-muted">{props.label}</p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-ink">
+          <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-ink">
             {hasValue ? props.value : 'Sin datos'}{' '}
             {hasValue && <span className="text-base font-medium text-muted">{props.unit}</span>}
           </p>

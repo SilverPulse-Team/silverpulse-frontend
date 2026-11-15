@@ -30,7 +30,7 @@ type LoadState<T> =
 type PhaseFilter = MissionPhase | 'all'
 
 const fieldClassName =
-  'mt-1.5 min-h-11 w-full rounded-control border border-line bg-card px-3 text-sm text-ink focus:border-nasa-blue'
+  'sp-field mt-1.5 w-full rounded-control border border-line bg-card px-3 text-sm text-ink transition-colors hover:border-slate-400 focus:border-nasa-blue'
 
 const phaseOptions: Array<{ value: PhaseFilter; label: string }> = [
   { value: 'preflight', label: 'Pre-vuelo' },
@@ -43,6 +43,22 @@ const phaseLabels: Record<string, string> = {
   preflight: 'Pre-vuelo',
   inflight: 'Durante vuelo',
   postflight: 'Post-vuelo',
+}
+
+const sourceLabels: Record<string, string> = {
+  synthetic: 'Sintético',
+  wearable: 'Wearable',
+  clinical_assessment: 'Evaluación clínica',
+  public_dataset: 'Dataset público',
+  manual: 'Registro manual',
+  mission_context: 'Contexto de misión',
+}
+
+const qualityLabels: Record<string, string> = {
+  adequate: 'Adecuada',
+  low: 'Baja',
+  unknown: 'Desconocida',
+  not_applicable: 'No aplica',
 }
 
 function errorMessage(error: unknown) {
@@ -188,32 +204,46 @@ export function TrendsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Entorno nave · Analítica descriptiva"
-        title="Tendencias fisiológicas"
-        description={`${contextState.data.astronaut.display_name} · ${contextState.data.astronaut.id}. Las comparaciones no constituyen diagnóstico.`}
-        badge={<span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">DATOS SINTÉTICOS · DEMO</span>}
-      />
+      <section className="rounded-card border border-line bg-card p-5 shadow-card lg:p-6" aria-label="Encabezado de tendencias">
+        <PageHeader
+          eyebrow="Entorno nave · Analítica descriptiva"
+          title="Tendencias fisiológicas"
+          description={`${contextState.data.astronaut.display_name} · ${contextState.data.astronaut.id}. Las comparaciones no constituyen diagnóstico.`}
+          badge={<span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">DATOS SINTÉTICOS · DEMO</span>}
+        />
+        <div className="mt-5 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:items-center">
+          <span className="w-fit rounded-control border border-line bg-canvas px-3 py-1.5 font-mono text-xs font-semibold text-nasa-blue">
+            /astronaut/trends
+          </span>
+          <span className="font-medium text-ink">Misión: <span className="font-mono">{contextState.data.astronaut.mission_id}</span></span>
+          <span className="text-muted">Métrica activa: {selectedMetric?.label ?? metricCode}</span>
+        </div>
+      </section>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Seleccionar fase de misión">
-        {phaseOptions.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={phase === option.value}
-            onClick={() => setPhase(option.value)}
-            className={`min-h-11 rounded-control border px-4 text-sm font-semibold transition-colors ${
-              phase === option.value
-                ? 'border-nasa-blue bg-nasa-blue text-white'
-                : 'border-line bg-card text-ink hover:border-nasa-blue hover:text-nasa-blue'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      <FilterBar label="Filtros de la serie" onClear={resetFilters}>
+      <FilterBar
+        label="Filtros de la serie"
+        onClear={resetFilters}
+        gridClassName="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+        toolbar={
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Seleccionar fase de misión">
+            {phaseOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={phase === option.value}
+                onClick={() => setPhase(option.value)}
+                className={`min-h-11 rounded-control border px-4 text-sm font-semibold transition-colors ${
+                  phase === option.value
+                    ? 'border-nasa-blue bg-nasa-blue text-white'
+                    : 'border-line bg-canvas text-ink hover:border-nasa-blue hover:text-nasa-blue'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        }
+      >
         <label className="text-sm font-medium text-ink">
           Métrica
           <select
@@ -232,14 +262,14 @@ export function TrendsPage() {
           Origen
           <select className={fieldClassName} value={source} onChange={(event) => setSource(event.target.value)}>
             <option value="all">Todos los orígenes</option>
-            {sources.map((value) => <option key={value} value={value}>{value}</option>)}
+            {sources.map((value) => <option key={value} value={value}>{sourceLabels[value] ?? value}</option>)}
           </select>
         </label>
         <label className="text-sm font-medium text-ink">
           Calidad
           <select className={fieldClassName} value={quality} onChange={(event) => setQuality(event.target.value)}>
             <option value="all">Todas las calidades</option>
-            {qualities.map((value) => <option key={value} value={value}>{value}</option>)}
+            {qualities.map((value) => <option key={value} value={value}>{qualityLabels[value] ?? value}</option>)}
           </select>
         </label>
         <label className="text-sm font-medium text-ink">
@@ -288,7 +318,7 @@ export function TrendsPage() {
 
       {series && (
         <>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
             <ChartPanel
               title={`${selectedMetric?.label ?? series.metric_code} (${series.unit})`}
               description={`${filteredPoints.length} de ${series.points.length} observaciones visibles. Eje temporal en UTC.`}
@@ -322,7 +352,7 @@ export function TrendsPage() {
             </aside>
           </div>
 
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumen de evidencia">
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumen de evidencia">
             <SummaryCard icon={CircleDot} label="Valor observado" value={filteredPoints.length === 1 ? `${filteredPoints[0].value} ${series.unit}` : `${filteredPoints.length} registros`} detail={`${filteredPoints.length} observaciones visibles`} />
             <SummaryCard
               icon={Ruler}
@@ -391,12 +421,12 @@ function SummaryCard({ icon: Icon, label, value, detail }: { icon: typeof Calend
     <article className="rounded-card border border-line bg-card p-5 shadow-card">
       <span className="grid size-9 place-items-center rounded-control bg-data/10 text-data"><Icon aria-hidden="true" className="size-4" /></span>
       <p className="mt-4 text-sm font-medium text-muted">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-ink">{value}</p>
+      <p className="mt-1 font-mono text-lg font-semibold text-ink">{value}</p>
       <p className="mt-2 text-sm leading-5 text-muted">{detail}</p>
     </article>
   )
 }
 
 function Definition({ label, value }: { label: string; value: string }) {
-  return <div><dt className="text-muted">{label}</dt><dd className="mt-1 font-medium text-ink">{value}</dd></div>
+  return <div><dt className="text-muted">{label}</dt><dd className="mt-1 font-mono font-medium text-ink">{value}</dd></div>
 }

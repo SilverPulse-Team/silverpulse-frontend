@@ -33,6 +33,7 @@ interface LinkStatusProps {
   loading?: boolean
   error?: string
   onRetry?: () => void
+  embedded?: boolean
 }
 
 export function LinkModeBadge({ mode }: { mode: SimulatorStatus['mode'] }) {
@@ -40,7 +41,7 @@ export function LinkModeBadge({ mode }: { mode: SimulatorStatus['mode'] }) {
   return <StatusBadge label={config.label} icon={config.icon} tone={config.tone} />
 }
 
-export function LinkStatus({ status, lastEarthSyncAt, loading, error, onRetry }: LinkStatusProps) {
+export function LinkStatus({ status, lastEarthSyncAt, loading, error, onRetry, embedded = false }: LinkStatusProps) {
   if (loading) return <LoadingSkeleton rows={3} label="Consultando estado del enlace con Tierra" />
 
   if (error) {
@@ -57,7 +58,14 @@ export function LinkStatus({ status, lastEarthSyncAt, loading, error, onRetry }:
   const config = modeConfig[status.mode]
 
   return (
-    <section aria-labelledby="earth-link-title" className="rounded-card border border-line bg-card p-5 shadow-card">
+    <section
+      aria-labelledby="earth-link-title"
+      className={
+        embedded
+          ? 'mt-5 rounded-control border border-line bg-canvas p-4'
+          : 'rounded-card border border-line bg-card p-5 shadow-card'
+      }
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-nasa-blue">Comunicaciones</p>
