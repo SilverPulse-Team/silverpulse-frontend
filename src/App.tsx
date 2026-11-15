@@ -1,111 +1,106 @@
+import { useState } from 'react'
+import { AppShell } from './components/layout/AppShell'
+import { PageHeader } from './components/layout/PageHeader'
+import type { ShellEnvironment } from './components/layout/navigation'
+
+const environmentOrder: ShellEnvironment[] = ['ship', 'earth', 'mission-control']
+
+function getInitialEnvironment(): ShellEnvironment {
+  const path = window.location.pathname
+  if (path.startsWith('/medical')) return 'earth'
+  if (path.startsWith('/mission-control')) return 'mission-control'
+  return 'ship'
+}
+
+const previewContent: Record<
+  ShellEnvironment,
+  { path: string; title: string; eyebrow: string; description: string; breadcrumb: string[] }
+> = {
+  ship: {
+    path: '/astronaut',
+    title: 'Panel del astronauta',
+    eyebrow: 'Entorno nave',
+    description: 'Observaciones registradas localmente en nave. Los módulos funcionales se implementarán en los siguientes epics.',
+    breadcrumb: ['SilverPulse', 'Nave', 'Resumen'],
+  },
+  earth: {
+    path: '/medical',
+    title: 'Bandeja médica',
+    eyebrow: 'Entorno Tierra',
+    description: 'Este entorno mostrará únicamente informes entregados y guardados en Tierra, nunca datos locales pendientes en nave.',
+    breadcrumb: ['SilverPulse', 'Tierra', 'Bandeja médica'],
+  },
+  'mission-control': {
+    path: '/mission-control',
+    title: 'SilverPulse Sync · Mission Control',
+    eyebrow: 'Simulador de comunicación',
+    description: 'Simulación local de enlace diferido. No representa una red espacial real ni un estado médico.',
+    breadcrumb: ['SilverPulse', 'Mission Control'],
+  },
+}
+
 function App() {
+  const [environment, setEnvironment] = useState<ShellEnvironment>(getInitialEnvironment)
+  const current = previewContent[environment]
+  const activePath = window.location.pathname === '/' ? current.path : window.location.pathname
+
+  const changeEnvironment = () => {
+    const currentIndex = environmentOrder.indexOf(environment)
+    const nextEnvironment = environmentOrder[(currentIndex + 1) % environmentOrder.length]
+    window.history.replaceState(null, '', previewContent[nextEnvironment].path)
+    setEnvironment(nextEnvironment)
+  }
+
   return (
-    <div className="min-h-screen bg-canvas text-ink lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="bg-deep-space px-6 py-8 text-white lg:min-h-screen">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden="true"
-            className="grid size-10 place-items-center rounded-full border border-data font-semibold text-data"
-          >
-            SP
-          </span>
-          <div>
-            <p className="text-lg font-semibold tracking-tight">SilverPulse</p>
-            <p className="text-sm text-slate-300">Sistema de diseño</p>
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-card bg-midnight-surface p-4 text-sm text-slate-200">
-          <p className="font-semibold text-white">Entorno de muestra</p>
-          <p className="mt-1">Página técnica para verificar tokens y estilos globales.</p>
-        </div>
-      </aside>
-
-      <main className="px-4 py-8 sm:px-8 lg:px-12 lg:py-10">
-        <header className="mb-8 flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-nasa-blue">
-              Fundamentos visuales · FE-04
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Interfaz de misión sobria y accesible
-            </h1>
-            <p className="mt-2 max-w-2xl text-muted">
-              Tokens locales de SilverPulse aplicados sobre un canvas claro y una superficie oscura.
-            </p>
-          </div>
-          <span className="w-fit rounded-full border border-notice/30 bg-notice/10 px-3 py-1.5 text-sm font-semibold text-ink">
+    <AppShell
+      environment={environment}
+      activePath={activePath}
+      title={current.title}
+      breadcrumb={current.breadcrumb}
+      onChangeEnvironment={changeEnvironment}
+    >
+      <PageHeader
+        eyebrow={current.eyebrow}
+        title={current.title}
+        description={current.description}
+        badge={
+          <span className="rounded-full border border-notice/30 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">
             DATOS SINTÉTICOS · DEMO
           </span>
-        </header>
+        }
+      />
 
-        <section aria-labelledby="tokens-title">
-          <h2 id="tokens-title" className="text-xl font-semibold">
-            Tokens principales
-          </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article className="rounded-card border border-line bg-card p-5 shadow-card">
-              <span className="mb-4 block h-2 rounded-full bg-nasa-blue" />
-              <p className="font-semibold">NASA Blue</p>
-              <p className="mt-1 text-sm text-muted">Acciones y navegación activa</p>
-              <code className="mt-4 block text-sm">#0B3D91</code>
-            </article>
-            <article className="rounded-card border border-line bg-card p-5 shadow-card">
-              <span className="mb-4 block h-2 rounded-full bg-data" />
-              <p className="font-semibold">Datos</p>
-              <p className="mt-1 text-sm text-muted">Visualización secundaria</p>
-              <code className="mt-4 block text-sm">#2687C9</code>
-            </article>
-            <article className="rounded-card border border-line bg-card p-5 shadow-card">
-              <span className="mb-4 block h-2 rounded-full bg-coverage" />
-              <p className="font-semibold">Cobertura</p>
-              <p className="mt-1 text-sm text-muted">Evidencia disponible</p>
-              <code className="mt-4 block text-sm">#15877A</code>
-            </article>
-            <article className="rounded-card border border-line bg-card p-5 shadow-card">
-              <span className="mb-4 block h-2 rounded-full bg-nasa-red" />
-              <p className="font-semibold">NASA Red</p>
-              <p className="mt-1 text-sm text-muted">Acento puntual, no diagnóstico</p>
-              <code className="mt-4 block text-sm">#FC3D21</code>
-            </article>
-          </div>
-        </section>
-
-        <section aria-labelledby="controls-title" className="mt-8 rounded-card border border-line bg-card p-6 shadow-card">
-          <h2 id="controls-title" className="text-xl font-semibold">
-            Controles y foco
-          </h2>
-          <p className="mt-2 text-muted">
-            Usa Tab para comprobar el indicador de foco visible y los estados distinguibles.
+      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Vista previa del layout">
+        <article className="rounded-card border border-line bg-card p-5 shadow-card">
+          <p className="text-sm font-semibold text-nasa-blue">Navegación contextual</p>
+          <h2 className="mt-2 text-lg font-semibold">Entorno siempre visible</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            El menú cambia según nave, Tierra o control de misión y conserva Evidencia como sección compartida.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="min-h-11 rounded-control bg-nasa-blue px-5 py-2.5 font-semibold text-white transition-colors hover:bg-deep-space"
-            >
-              Acción principal
-            </button>
-            <button
-              type="button"
-              className="min-h-11 rounded-control border border-line bg-card px-5 py-2.5 font-semibold text-ink transition-colors hover:border-nasa-blue hover:text-nasa-blue"
-            >
-              Acción secundaria
-            </button>
-            <button
-              type="button"
-              disabled
-              className="min-h-11 cursor-not-allowed rounded-control bg-slate-200 px-5 py-2.5 font-semibold text-slate-500"
-            >
-              Acción deshabilitada
-            </button>
-          </div>
-        </section>
+        </article>
+        <article className="rounded-card border border-line bg-card p-5 shadow-card">
+          <p className="text-sm font-semibold text-nasa-blue">Responsive</p>
+          <h2 className="mt-2 text-lg font-semibold">Tres modos de navegación</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Sidebar completa en desktop, barra compacta en tablet y drawer accesible en móvil.
+          </p>
+        </article>
+        <article className="rounded-card border border-line bg-card p-5 shadow-card md:col-span-2 xl:col-span-1">
+          <p className="text-sm font-semibold text-nasa-blue">Separación operativa</p>
+          <h2 className="mt-2 text-lg font-semibold">Nave y Tierra no se mezclan</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            El estado offline describe el enlace de comunicación y no comunica peligro o condición clínica.
+          </p>
+        </article>
+      </section>
 
-        <p className="mt-8 text-sm text-muted">
-          Prototipo independiente · NASA Space Apps Challenge 2026
+      <div className="mt-6 rounded-card border border-data/30 bg-data/5 p-5">
+        <p className="text-sm font-semibold text-ink">Vista técnica FE-05</p>
+        <p className="mt-1 text-sm leading-6 text-muted">
+          Usa «Cambiar entorno demo» al final del menú para revisar las variantes. Las páginas finales reemplazarán este contenido al configurar React Router en FE-07.
         </p>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   )
 }
 
