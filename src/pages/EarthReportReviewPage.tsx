@@ -19,6 +19,12 @@ type ReportState =
   | { status: 'error'; message: string }
   | { status: 'ready'; data: Report }
 
+const phaseLabels: Record<string, string> = {
+  preflight: 'Pre-vuelo',
+  inflight: 'Durante vuelo',
+  postflight: 'Post-vuelo',
+}
+
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado al consultar la revisión.'
 }
@@ -82,11 +88,13 @@ export function EarthReportReviewPage() {
           review_status: 'reviewed',
           note: note.trim(),
           followup_requested: followupRequested,
-          is_demo: report.is_demo,
+          is_demo: true,
         }
         const result = await getDataProvider().reviewEarthReport(id, input)
         setReviewResult(result)
-        retry()
+        if (result.status === 'queued') {
+          setReportState({ status: 'ready', data: { ...report, review_status: 'reviewed' } })
+        }
       } catch (error) {
         setSubmissionError(getErrorMessage(error))
       } finally {
@@ -146,7 +154,7 @@ export function EarthReportReviewPage() {
       <PageHeader
         eyebrow="Entorno Tierra · Médico de vuelo ficticio"
         title={`Revisión del informe ${report.report_id}`}
-        description={`${report.astronaut_id} · ${report.phase}`}
+        description={`${report.astronaut_id} · ${phaseLabels[report.phase] ?? report.phase}`}
         badge={
           <span className="rounded-full border border-notice/40 bg-notice/10 px-3 py-1 text-xs font-semibold text-ink">
             Recibido en Tierra · DEMO
@@ -179,7 +187,9 @@ export function EarthReportReviewPage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <DataSourceBadge source={observation.source_kind} />
                   <QualityBadge quality={observation.quality} />
-                  <span className="text-xs text-muted">{observation.phase} · {observation.is_synthetic ? 'Sintético' : 'No sintético'}</span>
+                  <span className="text-xs text-muted">
+                    {phaseLabels[observation.phase] ?? observation.phase} · {observation.is_synthetic ? 'Sintético' : 'No sintético'}
+                  </span>
                 </div>
               </li>
             ))}
@@ -190,6 +200,9 @@ export function EarthReportReviewPage() {
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-card border border-line bg-card p-5 shadow-card">
           <h2 className="text-lg font-semibold text-ink">Análisis recibido</h2>
+          <p className="mt-2 text-sm text-muted">
+            Método: <strong>{report.analysis.method}</strong> · versión <strong>{report.analysis.algorithm_version}</strong>
+          </p>
           <p className="mt-3 text-sm leading-6 text-ink">{report.analysis.explanation}</p>
           <ul className="mt-4 space-y-3">
             {report.analysis.reason_codes.map((code, index) => (
@@ -214,25 +227,81 @@ export function EarthReportReviewPage() {
           {submissionError && <p role="alert" className="mt-3 rounded-control border border-nasa-red/30 bg-nasa-red/5 p-3 text-sm text-ink">{submissionError}</p>}
           {reviewResult && (
             <p role="status" className="mt-3 rounded-control border border-coverage/30 bg-coverage/5 p-3 text-sm text-ink">
-              Revisión registrada: {reviewResult.status} · respuesta {reviewResult.return_message_id} en cola. Esto no significa que haya sido recibida en nave; se confirmará únicamente en /ship/inbox.
+              <strong className="block">
+                {reviewResult.status === 'queued'
+                  ? 'Revisión guardada · Respuesta en cola'
+                  : 'Respuesta de revisión recibida; el estado de cola no está confirmado'}
+              </strong>
+              <span className="mt-1 block">ID de revisión: {reviewResult.review_id}</span>
+              <span className="block">ID del mensaje de retorno: {reviewResult.return_message_id}</span>
+              <span className="block">Estado informado por la API: {reviewResult.status}</span>
+              <span className="mt-1 block">
+                Esto no significa que haya sido recibida en nave; se confirma únicamente al encontrarla en /ship/inbox.
+              </span>
+              <Link
+                to="/mission-control"
+                className="mt-2 inline-flex min-h-11 items-center font-semibold text-nasa-blue hover:text-deep-space"
+              >
+                Consultar timeline de sincronización
+              </Link>
             </p>
           )}
-          <form onSubmit={(event) => { void submitReview(event) }} className="mt-4 space-y-4">
-            <label className="grid gap-1.5 text-sm font-medium text-ink">
-              Nota de revisión ficticia
-              <textarea value={note} onChange={(event) => setNote(event.target.value)} required rows={4} maxLength={2000} className="rounded-control border border-line bg-white p-3 text-sm font-normal" />
-            </label>
-            <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
-              <input type="checkbox" checked={followupRequested} onChange={(event) => setFollowupRequested(event.target.checked)} className="size-4 accent-nasa-blue" />
-              Solicitar seguimiento
-            </label>
-            <p className="text-xs leading-5 text-muted">
-              La respuesta se encola en Tierra; no se presenta como recibida hasta que aparezca en la bandeja de nave.
-            </p>
-            <button type="submit" disabled={submissionLoading || !note.trim()} aria-busy={submissionLoading} className="inline-flex min-h-11 items-center justify-center rounded-control bg-nasa-blue px-4 py-2 text-sm font-semibold text-white hover:bg-deep-space disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600">
-              {submissionLoading ? 'Registrando revisión…' : 'Registrar revisión y encolar respuesta'}
-            </button>
-          </form>
+          {!reviewResult && report.review_status !== 'pending' && (
+            <div role="status" className="mt-3 rounded-control border border-line bg-canvas p-3 text-sm text-ink">
+              <p>
+                Este informe ya figura como {report.review_status === 'reviewed' ? 'revisado' : 'revisado; el retorno aún no consta como recibido en nave'}.
+                La recepción solo se confirma consultando /ship/inbox.
+              </p>
+              <Link
+                to="/mission-control"
+                className="mt-2 inline-flex min-h-11 items-center font-semibold text-nasa-blue hover:text-deep-space"
+              >
+                Consultar timeline de sincronización
+              </Link>
+            </div>
+          )}
+          {report.review_status === 'pending' && !reviewResult && (
+            <form onSubmit={(event) => { void submitReview(event) }} className="mt-4 space-y-4">
+              <label className="grid gap-1.5 text-sm font-medium text-ink">
+                Nota de revisión ficticia
+                <textarea
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                  required
+                  rows={4}
+                  maxLength={2000}
+                  disabled={submissionLoading || Boolean(reviewResult)}
+                  className="rounded-control border border-line bg-white p-3 text-sm font-normal disabled:bg-canvas"
+                />
+              </label>
+              <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
+                <input
+                  type="checkbox"
+                  checked={followupRequested}
+                  onChange={(event) => setFollowupRequested(event.target.checked)}
+                  disabled={submissionLoading || Boolean(reviewResult)}
+                  className="size-4 accent-nasa-blue"
+                />
+                Solicitar seguimiento
+              </label>
+              <div className="rounded-control border border-line bg-canvas p-3 text-sm text-ink">
+                <p>Estado al guardar: <strong>Revisado</strong></p>
+                <p className="mt-1 text-xs text-muted">El contrato solo permite registrar review_status=reviewed.</p>
+                <p className="mt-1 text-xs text-muted">La solicitud se envía con is_demo=true; esta nota es ficticia.</p>
+              </div>
+              <p className="text-xs leading-5 text-muted">
+                La respuesta se encola en Tierra; no se presenta como recibida hasta que aparezca en la bandeja de nave.
+              </p>
+              <button
+                type="submit"
+                disabled={submissionLoading || Boolean(reviewResult) || !note.trim()}
+                aria-busy={submissionLoading}
+                className="inline-flex min-h-11 items-center justify-center rounded-control bg-nasa-blue px-4 py-2 text-sm font-semibold text-white hover:bg-deep-space disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
+              >
+                {submissionLoading ? 'Registrando revisión…' : 'Registrar revisión y encolar respuesta'}
+              </button>
+            </form>
+          )}
         </section>
       </section>
     </article>

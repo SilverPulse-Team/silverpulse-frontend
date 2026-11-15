@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  earthDeliveredReportFixture,
   medicalReviewRequestFixture,
   medicalReviewResultFixture,
   reportGenerateRequestFixture,
@@ -41,6 +42,20 @@ describe('servicio HTTP de informes de nave', () => {
 
     expect(reports.items[0].report_id).toBe('RPT-0001')
     expect(String(fetchImplementation.mock.calls[0][0])).toBe('http://localhost:8000/api/v1/ship/reports')
+  })
+
+  it('consulta el detalle terrestre solo mediante GET /earth/reports/{id}', async () => {
+    const fetchImplementation = vi.fn<typeof fetch>(async () => new Response(
+      JSON.stringify(earthDeliveredReportFixture),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    ))
+    const provider = createHttpDataProvider({ baseUrl: 'http://localhost:8000/api/v1', fetchImplementation })
+
+    const report = await provider.getEarthReport('RPT-0001')
+
+    expect(report).toEqual(earthDeliveredReportFixture)
+    expect(String(fetchImplementation.mock.calls[0][0])).toBe('http://localhost:8000/api/v1/earth/reports/RPT-0001')
+    expect(fetchImplementation).toHaveBeenCalledTimes(1)
   })
 
   it('envía la revisión de Tierra con el body contractual y conserva el estado de respuesta', async () => {

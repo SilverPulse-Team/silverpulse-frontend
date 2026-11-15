@@ -15,10 +15,10 @@ La pantalla no usa `/health` como señal de enlace y el contrato v0.2.0 no ofrec
 5. Configura `online` o `delayed` y confirma el modo en la respuesta del simulador.
 6. Avanza el reloj con un entero entre 1 y 86400. Después de la respuesta válida, la pantalla vuelve a consultar status, métricas e informes. Los resultados solo se muestran si `/simulator/metrics` informa `has_run=true`.
 7. Comprueba recepción en Tierra mediante `GET /earth/reports` y `communication.status=delivered` con `delivered_at_utc`. Mission Control no deduce recepción solo por el cambio de modo o por avanzar el reloj.
-8. Abre la bandeja Tierra (`/medical`) y el informe recibido (`/medical/reports/{report_id}`). Registra una revisión; la respuesta indica que quedó en cola, no que volvió a nave.
+8. Abre la bandeja Tierra (`/medical`), filtra por fase, fecha de recepción, astronauta o estado de revisión y abre un informe confirmado (`/medical/reports/{report_id}`). La ficha solo consulta `/earth/reports/{id}`. Registra la revisión ficticia con `review_status=reviewed` e `is_demo=true`; el resultado muestra `review_id`, `return_message_id` y el estado devuelto por la API. `queued` significa que la respuesta está en cola, no que volvió a nave.
 9. Confirma el retorno solo cuando `GET /ship/inbox` incluya el `report_id`, el `message_id`, la nota y `received_at_utc`.
 
-Los enlaces a informes de nave, bandeja Tierra y revisión están disponibles desde la secuencia guiada. Cada pantalla vuelve a consultar su propio endpoint al abrirse o al reintentar.
+Un informe ya marcado como revisado no vuelve a ofrecer el formulario de envío. El enlace a la secuencia de sincronización lleva a Mission Control; la recepción se confirma únicamente desde `/ship/inbox`. Los enlaces a informes de nave, bandeja Tierra y revisión están disponibles desde la secuencia guiada. Cada pantalla vuelve a consultar su propio endpoint al abrirse o al reintentar.
 
 ## Modo mock
 
