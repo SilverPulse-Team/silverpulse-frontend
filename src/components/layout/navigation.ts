@@ -8,7 +8,6 @@ import {
   Inbox,
   Radio,
   Satellite,
-  Stethoscope,
   Upload,
   type LucideIcon,
 } from 'lucide-react'
@@ -42,7 +41,7 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
       { label: 'Importar datos', href: '/astronaut/import', icon: Upload },
       { label: 'Tendencias', href: '/astronaut/trends', icon: ChartNoAxesCombined },
       { label: 'Preparación de retorno', href: '/astronaut/return', icon: ClipboardCheck },
-      { label: 'Informes', href: '/astronaut/reports/RPT-0001', icon: FileText },
+      { label: 'Informes', href: '/astronaut#ship-reports', icon: FileText },
       { label: 'Comunicaciones', href: '/mission-control', icon: Radio },
       ...sharedNavigation,
     ],
@@ -53,7 +52,6 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     profile: 'Médico Demo · CMO-DEMO',
     navigation: [
       { label: 'Bandeja médica', href: '/medical', icon: Inbox },
-      { label: 'Revisiones', href: '/medical/reports/RPT-0001', icon: Stethoscope },
       ...sharedNavigation,
     ],
   },

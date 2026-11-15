@@ -143,7 +143,7 @@ export class ApiClient {
   constructor(options: ApiClientOptions = {}) {
     this.baseUrl = resolveApiBaseUrl(options.baseUrl)
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
-    this.fetchImplementation = options.fetchImplementation ?? fetch
+    this.fetchImplementation = options.fetchImplementation ?? globalThis.fetch.bind(globalThis)
   }
 
   get<T>(path: string, parser: ResponseParser<T>, options: RequestOptions = {}): Promise<T> {

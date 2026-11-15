@@ -28,19 +28,19 @@ const rows: ImportDraftRow[] = [
 ]
 
 describe('reconcileRejectedRows', () => {
-  it('conserva solo las filas rechazadas después de una importación parcial', () => {
+  it('mapea el índice cero-based del backend a la fila fuente rechazada', () => {
     const reconciled = reconcileRejectedRows(rows, {
       accepted: 1,
       rejected: 1,
       observation_ids: ['OBS-1'],
-      errors: [{ row: 2, code: 'UNIT', detail: 'Unidad incompatible' }],
+      errors: [{ row: 0, code: 'UNIT', detail: 'Unidad incompatible' }],
     })
 
     expect(reconciled.rows.map((row) => row.row)).toEqual([2])
     expect(reconciled.errors).toEqual([expect.objectContaining({ row: 2, field: 'row', code: 'UNIT' })])
   })
 
-  it('interpreta el número como posición cuando no coincide con la línea original', () => {
+  it('conserva el índice cero-based para la segunda observación de la solicitud', () => {
     const reconciled = reconcileRejectedRows(rows, {
       accepted: 1,
       rejected: 1,
@@ -48,7 +48,7 @@ describe('reconcileRejectedRows', () => {
       errors: [{ row: 1, code: 'DUPLICATE', detail: 'Registro duplicado' }],
     })
 
-    expect(reconciled.rows.map((row) => row.row)).toEqual([2])
-    expect(reconciled.errors[0].row).toBe(2)
+    expect(reconciled.rows.map((row) => row.row)).toEqual([3])
+    expect(reconciled.errors[0].row).toBe(3)
   })
 })

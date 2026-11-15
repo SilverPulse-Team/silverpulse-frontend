@@ -623,7 +623,7 @@ export function ImportPage() {
 
           {isSynthetic && (
             <AlertNotice title="Escenario sintético seleccionado" tone="notice">
-              <p>SCENARIO-001 contiene registros ficticios del mock v0.2.0. No representa datos médicos reales ni una conexión activa con sensores.</p>
+              <p>SCENARIO-001 contiene valores sintéticos de demostración v0.2.0. Al confirmar, se envían al proveedor activo. No representan datos médicos reales ni una conexión a sensores.</p>
             </AlertNotice>
           )}
         </section>
