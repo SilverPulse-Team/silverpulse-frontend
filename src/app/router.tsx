@@ -115,7 +115,7 @@ function ShellRouter() {
   const location = useLocation()
   const navigate = useNavigate()
   const routeInfo = resolveRouteInfo(location.pathname, environment)
-  const activePath = location.pathname === '/' ? '/astronaut' : location.pathname
+  const activePath = location.pathname === '/' ? '/astronaut' : `${location.pathname}${location.hash}`
 
   const changeEnvironment = () => {
     const currentIndex = environmentOrder.indexOf(environment)

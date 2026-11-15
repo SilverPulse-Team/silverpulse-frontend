@@ -5,15 +5,13 @@ export function reconcileRejectedRows(rows: ImportDraftRow[], result: ImportResu
   rows: ImportDraftRow[]
   errors: ImportRowError[]
 } {
-  const matchedRows = result.errors.map((error) => (
-    rows.find((row) => error.row === row.row) ?? rows[error.row - 1]
-  ))
+  const matchedRows = result.errors.map((error) => rows[error.row])
   const failedRowNumbers = new Set(matchedRows.flatMap((row) => row ? [row.row] : []))
   const failedRows = rows.filter((row) => failedRowNumbers.has(row.row))
   const rowsToCorrect = result.accepted > 0 && failedRows.length > 0 ? failedRows : rows
 
   const errors: ImportRowError[] = result.errors.flatMap((error) => {
-    const matchedRow = rows.find((row) => error.row === row.row) ?? rows[error.row - 1]
+    const matchedRow = rows[error.row]
     const rowNumber = matchedRow?.row ?? error.row
     if (!rowsToCorrect.some((row) => row.row === rowNumber)) return []
     return [{

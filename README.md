@@ -97,34 +97,26 @@ bandeja médica de Tierra.
 
 Las páginas deben consumir la interfaz común de `src/services/dataProvider.ts`,
 obtenida mediante `getDataProvider()`, en lugar de importar fixtures directamente.
-Esta fase usa exclusivamente el proveedor mock. El proveedor HTTP está preparado
-para una etapa futura, pero no se debe activar ni apuntar a un backend ahora.
+El proveedor mock sigue siendo el predeterminado. Para una integración local
+opt-in, configura `VITE_DATA_PROVIDER=http` y `VITE_API_BASE_URL` en
+`.env.local`; las variables `VITE_*` son públicas y no deben contener secretos.
 
-### Integración futura con FastAPI (no activar en esta fase)
+### Integración local opcional con FastAPI
 
-`src/services/httpDataProvider.ts` y sus parsers se conservan para una futura
-integración aprobada con FastAPI v0.2.0. Durante la implementación frontend se
-debe mantener `VITE_DATA_PROVIDER=mock`; no cambiarlo a `http` ni ejecutar
-solicitudes a endpoints reales. La base URL siguiente es solo una referencia
-futura:
+`src/services/httpDataProvider.ts` y sus parsers integran FastAPI v0.2.0. Para
+usarlos localmente, configura:
 
 ```bash
 VITE_DATA_PROVIDER=http
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-Las variables `VITE_*` quedan visibles en el bundle del navegador y nunca deben
-contener tokens, contraseñas ni otros secretos. El cliente no incluye credenciales
-por defecto.
-
-FastAPI debe permitir CORS para el origen de desarrollo de Vite, normalmente
-`http://localhost:5173`, incluyendo los métodos `GET`, `POST` y `OPTIONS` y el
-header `Content-Type`. Esta configuración se realiza en el backend; no se resuelve
-deshabilitando seguridad en el navegador.
-
-Cuando se autorice esa etapa, `GET /health` comprobará únicamente que FastAPI
-responde; no indicará que el enlace simulado con Tierra esté online. Ese estado
-procederá exclusivamente de `GET /simulator/status`.
+FastAPI debe permitir CORS para el origen de Vite, normalmente
+`http://localhost:5173`. El flujo importación → informe → entrega diferida →
+revisión → retorno se verificó localmente con datos sintéticos. MOCK continúa
+siendo el valor de `.env.example` y las pruebas de backend/frontend son
+independientes. Consulta la [guía de integración API](./docs/api-integration.md)
+para los resultados y límites de la verificación.
 
 Consulta la [guía de integración API](./docs/api-integration.md) para el preflight
 de FastAPI y la matriz de endpoints, el [guion demo E2E](./docs/demo-e2e.md)

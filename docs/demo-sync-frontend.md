@@ -1,7 +1,7 @@
 # Guía demostrativa de SilverPulse Sync
 
-> Guía de referencia para una fase futura de integración. En la fase frontend
-> actual, conserva `VITE_DATA_PROVIDER=mock` y no ejecutes solicitudes a FastAPI.
+> La configuración versionada conserva MOCK como proveedor predeterminado. La
+> secuencia HTTP de esta guía se verificó localmente con datos sintéticos.
 
 ## Alcance y límites
 
@@ -9,21 +9,34 @@
 
 La pantalla no usa `/health` como señal de enlace y el contrato v0.2.0 no ofrece un endpoint de paquetes ni de reinicio. La tabla usa únicamente mensajes de informes de `/ship/reports` y respuestas recibidas de `/ship/inbox`; muestra `—` para reintentos, que el contrato no proporciona.
 
-## Reproducir con el backend
+## Recorrido HTTP verificado
 
-1. Inicia FastAPI con el contrato SilverPulse v0.2.0 y el frontend con `VITE_DATA_PROVIDER=http` y `VITE_API_BASE_URL` apuntando a su API.
-2. En `/astronaut`, genera un informe. Confirma su `report_id` en la respuesta de `POST /ship/reports/generate` y en `GET /ship/reports`.
-3. En `/mission-control`, configura `offline`. La acción solo se considera aceptada cuando `POST /simulator/config` devuelve `mode=offline`; confirma la cola con `GET /simulator/status`.
-4. Comprueba `queued_ship_to_earth > 0`. La cola no significa entrega.
-5. Configura `online` o `delayed` y confirma el modo en la respuesta del simulador.
-6. Avanza el reloj con un entero entre 1 y 86400. Después de la respuesta válida, la pantalla vuelve a consultar status, métricas e informes. Los resultados solo se muestran si `/simulator/metrics` informa `has_run=true`.
-7. Comprueba recepción en Tierra mediante `GET /earth/reports` y `communication.status=delivered` con `delivered_at_utc`. Mission Control no deduce recepción solo por el cambio de modo o por avanzar el reloj.
-8. Abre la bandeja Tierra (`/medical`), filtra por fase, fecha de recepción, astronauta o estado de revisión y abre un informe confirmado (`/medical/reports/{report_id}`). La ficha solo consulta `/earth/reports/{id}`. Registra la revisión ficticia con `review_status=reviewed` e `is_demo=true`; el resultado muestra `review_id`, `return_message_id` y el estado devuelto por la API. `queued` significa que la respuesta está en cola, no que volvió a nave.
-9. Confirma el retorno solo cuando `GET /ship/inbox` incluya el `report_id`, el `message_id`, la nota y `received_at_utc`.
+1. Configura `.env.local` con `VITE_DATA_PROVIDER=http` y
+   `VITE_API_BASE_URL=http://localhost:8000/api/v1`. La configuración de CORS se
+   aplica en FastAPI.
+2. Importa el escenario de dos observaciones sintéticas; confirma la respuesta
+   de importación y que dashboard y tendencias reflejen los datos backend.
+3. Genera un informe desde `/astronaut`; la ejecución comprobada creó
+   `RPT-BCDAEAC7BD`.
+4. En Mission Control, configura `offline`. Se observó un informe en cola y
+   cero informes en `/medical`; la cola no significa entrega.
+5. Configura `delayed` y avanza 3600 segundos simulados. La API confirmó una
+   entrega, cero duplicados y cola vacía; el informe apareció en
+   `/earth/reports` con hora de recepción.
+6. Revisa el informe en `/medical/reports/{report_id}` con una nota demo y
+   `is_demo=true`. El backend guardó `review_status=reviewed` y devolvió el
+   mensaje `MSG-RETURN-9EDA2A498E` en estado `queued`.
+7. Avanza otros 3600 segundos. `/ship/inbox` confirmó la respuesta recibida; la
+   bandeja de nave mostró un mensaje. Se observó persistencia al recargar el
+   navegador.
+
+Los IDs y métricas citados corresponden a una ejecución local aislada y pueden
+cambiar al repetirla. `/simulator/metrics` reportó `has_run=true`; sus
+contadores son mediciones de esa ejecución, no proyecciones.
 
 Un informe ya marcado como revisado no vuelve a ofrecer el formulario de envío. El enlace a la secuencia de sincronización lleva a Mission Control; la recepción se confirma únicamente desde `/ship/inbox`. Los enlaces a informes de nave, bandeja Tierra y revisión están disponibles desde la secuencia guiada. Cada pantalla vuelve a consultar su propio endpoint al abrirse o al reintentar.
 
-## Modo mock
+## Proveedor MOCK (predeterminado)
 
 - Los GET reproducen fixtures; el fixture inicial de métricas tiene `has_run=false` y la UI muestra «No ejecutada / Sin resultados» para valores no medidos.
 - `POST /simulator/config` actualiza solo el status mock en memoria; no persiste al recargar ni entrega mensajes.
