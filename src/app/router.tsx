@@ -8,6 +8,7 @@ import { AstronautOverviewPage } from '../pages/AstronautOverviewPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
+import { ShipReportDetailPage } from '../pages/ShipReportDetailPage'
 import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
 import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
@@ -170,7 +171,7 @@ function ShellRouter() {
           element={<PlaceholderPage viewName="Bandeja médica" description="Contendrá únicamente informes entregados y guardados en Tierra, nunca datos locales pendientes en nave." />}
         />
         <Route path="/medical/reports/:id" element={<ReportPlaceholderPage context="earth" />} />
-        <Route path="/astronaut/reports/:id" element={<ReportPlaceholderPage context="ship" />} />
+        <Route path="/astronaut/reports/:id" element={<ShipReportDetailPage />} />
         <Route
           path="/evidence"
           element={<PlaceholderPage viewName="Evidencia y metodología" description="Contendrá fuentes públicas, metodología reproducible, resultados ejecutados y limitaciones del prototipo." />}

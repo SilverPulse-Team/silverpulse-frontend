@@ -5,6 +5,7 @@ import { EarthMessagesPanel } from '../components/dashboard/EarthMessagesPanel'
 import { LinkModeBadge, LinkStatus } from '../components/dashboard/LinkStatus'
 import { NoticesPanel } from '../components/dashboard/NoticesPanel'
 import { PageHeader } from '../components/layout/PageHeader'
+import { ShipReportsPanel } from '../components/reports/ShipReportsPanel'
 import {
   EmptyState,
   ErrorState,
@@ -316,6 +317,8 @@ export function AstronautOverviewPage() {
           </div>
         )}
       </section>
+
+      <ShipReportsPanel astronautId={astronaut.id} phase={overview.mission_phase} />
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]" aria-label="Avisos y mensajes">
         <NoticesPanel notices={overview.notices} />

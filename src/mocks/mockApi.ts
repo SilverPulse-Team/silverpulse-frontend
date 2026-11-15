@@ -34,7 +34,11 @@ import {
   researchSourcesFixture,
   shipInboxAfterReturnFixture,
   shipReportFixture,
+  shipReportAfterDeliveryFixture,
+  shipReportAfterReturnFixture,
   shipReportsFixture,
+  shipReportsAfterDeliveryFixture,
+  shipReportsAfterReturnFixture,
   simulatorMetricsFixture,
   simulatorStatusFixture,
   trendsFixture,
@@ -240,11 +244,15 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
 
     async getShipReports(options?: PaginationOptions) {
       assertDefaultPagination(options)
+      if (scenario === 'after-delivery') return clone(shipReportsAfterDeliveryFixture)
+      if (scenario === 'after-return') return clone(shipReportsAfterReturnFixture)
       return clone(shipReportsFixture)
     },
 
     async getShipReport(reportId) {
       assertFixtureId(reportId, 'RPT-0001', 'informe de nave')
+      if (scenario === 'after-delivery') return clone(shipReportAfterDeliveryFixture)
+      if (scenario === 'after-return') return clone(shipReportAfterReturnFixture)
       return clone(shipReportFixture)
     },
 

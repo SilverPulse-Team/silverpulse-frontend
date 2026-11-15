@@ -255,6 +255,31 @@ export const shipReportsFixture = {
   offset: 0,
 } satisfies ListReports
 
+export const shipReportAfterDeliveryFixture = {
+  ...shipReportFixture,
+  communication: {
+    ...shipReportFixture.communication,
+    status: 'delivered',
+    delivered_at_utc: '2026-11-14T15:35:00Z',
+  },
+  review_status: 'pending',
+} satisfies Report
+
+export const shipReportAfterReturnFixture = {
+  ...shipReportAfterDeliveryFixture,
+  review_status: 'reviewed',
+} satisfies Report
+
+export const shipReportsAfterDeliveryFixture = {
+  ...shipReportsFixture,
+  items: [shipReportAfterDeliveryFixture],
+} satisfies ListReports
+
+export const shipReportsAfterReturnFixture = {
+  ...shipReportsFixture,
+  items: [shipReportAfterReturnFixture],
+} satisfies ListReports
+
 export const earthReportsBeforeDeliveryFixture = {
   items: [],
   total: 0,
@@ -420,6 +445,10 @@ export const silverPulseFixturesV020 = {
   reportGenerateRequest: reportGenerateRequestFixture,
   shipReport: shipReportFixture,
   shipReports: shipReportsFixture,
+  shipReportAfterDelivery: shipReportAfterDeliveryFixture,
+  shipReportAfterReturn: shipReportAfterReturnFixture,
+  shipReportsAfterDelivery: shipReportsAfterDeliveryFixture,
+  shipReportsAfterReturn: shipReportsAfterReturnFixture,
   earthReportsBeforeDelivery: earthReportsBeforeDeliveryFixture,
   simulatorStatus: simulatorStatusFixture,
   simulatorMetrics: simulatorMetricsFixture,
