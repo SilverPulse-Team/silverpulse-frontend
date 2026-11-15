@@ -7,13 +7,20 @@ import { LoadingSkeleton } from '../components/ui'
 import { AstronautOverviewPage } from '../pages/AstronautOverviewPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
-import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
+import { ShipReportDetailPage } from '../pages/ShipReportDetailPage'
+import { MissionControlPage } from '../pages/MissionControlPage'
+import { EarthReportsPage } from '../pages/EarthReportsPage'
+import { EarthReportReviewPage } from '../pages/EarthReportReviewPage'
 import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
+import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
 import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironment } from './demoEnvironment'
 
 const TrendsPage = lazy(() =>
   import('../pages/TrendsPage').then((module) => ({ default: module.TrendsPage })),
+)
+const EvidencePage = lazy(() =>
+  import('../pages/EvidencePage').then((module) => ({ default: module.EvidencePage })),
 )
 
 interface RouteInfo {
@@ -58,7 +65,7 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
     return {
       title: 'SilverPulse',
       breadcrumb: breadcrumbFor(environment, route.label, route.section),
-      fitViewport: path !== '/astronaut/trends' && path !== '/astronaut/import',
+      fitViewport: path !== '/astronaut/trends' && path !== '/astronaut/import' && path !== '/astronaut/return',
     }
   }
 
@@ -153,26 +160,19 @@ function ShellRouter() {
         />
         <Route
           path="/astronaut/return"
-          element={<PlaceholderPage viewName="Preparación de retorno" description="Contendrá la cobertura de evidencia disponible y faltante sin calcular una aptitud clínica automática." />}
+          element={<ReturnReadinessPage />}
         />
-        <Route
-          path="/mission-control"
-          element={
-            <PlaceholderPage
-              viewName={environment === 'ship' ? 'Comunicaciones' : 'SilverPulse Sync · Mission Control'}
-              description={environment === 'ship' ? 'Contendrá mensajes y estados de sincronización entre la nave y Tierra.' : 'Contendrá el simulador local de enlace diferido; no representa una red espacial real.'}
-            />
-          }
-        />
-        <Route
-          path="/medical"
-          element={<PlaceholderPage viewName="Bandeja médica" description="Contendrá únicamente informes entregados y guardados en Tierra, nunca datos locales pendientes en nave." />}
-        />
-        <Route path="/medical/reports/:id" element={<ReportPlaceholderPage context="earth" />} />
-        <Route path="/astronaut/reports/:id" element={<ReportPlaceholderPage context="ship" />} />
+        <Route path="/mission-control" element={<MissionControlPage />} />
+        <Route path="/medical" element={<EarthReportsPage />} />
+        <Route path="/medical/reports/:id" element={<EarthReportReviewPage />} />
+        <Route path="/astronaut/reports/:id" element={<ShipReportDetailPage />} />
         <Route
           path="/evidence"
-          element={<PlaceholderPage viewName="Evidencia y metodología" description="Contendrá fuentes públicas, metodología reproducible, resultados ejecutados y limitaciones del prototipo." />}
+          element={
+            <Suspense fallback={<LoadingSkeleton rows={6} label="Cargando evidencia científica" />}>
+              <EvidencePage />
+            </Suspense>
+          }
         />
         <Route path="*" element={<NotFoundPage homePath={environmentHome[environment]} />} />
       </Routes>

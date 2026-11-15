@@ -69,9 +69,14 @@ export function LongitudinalTrendChart({ points, baseline, unit }: LongitudinalT
   const maxTimestamp = Math.max(...timestamps)
   const padding = minTimestamp === maxTimestamp ? 12 * 60 * 60 * 1000 : 0
   const xDomain: [number, number] = [minTimestamp - padding, maxTimestamp + padding]
+  const observationLabel = numericPoints.length === 1 ? 'observación' : 'observaciones'
 
   return (
-    <div className="w-full" role="img" aria-label={`Gráfico de ${numericPoints.length} observaciones en ${unit}`}>
+    <div
+      className="w-full"
+      role="img"
+      aria-label={`Gráfico de ${numericPoints.length} ${observationLabel} en ${unit}; observaciones como puntos, sin línea de tendencia`}
+    >
       <div className="h-72 w-full sm:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 16, right: 14, bottom: 22, left: 0 }}>
@@ -118,7 +123,7 @@ export function LongitudinalTrendChart({ points, baseline, unit }: LongitudinalT
         {baseline?.median !== null && baseline?.median !== undefined && (
           <span className="inline-flex items-center gap-2">
             <span className="h-0.5 w-5 bg-coverage" aria-hidden="true" />
-            Baseline demo: mediana {baseline.median} {baseline.unit}
+            Baseline demo: mediana {baseline.median} {baseline.unit} · n={baseline.n}
           </span>
         )}
       </div>

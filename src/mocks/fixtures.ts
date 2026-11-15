@@ -3,6 +3,7 @@ import type {
   Astronaut,
   Baseline,
   CountermeasurePlan,
+  EvaluationResult,
   ImportRequest,
   ImportResult,
   ListObservations,
@@ -255,6 +256,31 @@ export const shipReportsFixture = {
   offset: 0,
 } satisfies ListReports
 
+export const shipReportAfterDeliveryFixture = {
+  ...shipReportFixture,
+  communication: {
+    ...shipReportFixture.communication,
+    status: 'delivered',
+    delivered_at_utc: '2026-11-14T15:35:00Z',
+  },
+  review_status: 'pending',
+} satisfies Report
+
+export const shipReportAfterReturnFixture = {
+  ...shipReportAfterDeliveryFixture,
+  review_status: 'reviewed',
+} satisfies Report
+
+export const shipReportsAfterDeliveryFixture = {
+  ...shipReportsFixture,
+  items: [shipReportAfterDeliveryFixture],
+} satisfies ListReports
+
+export const shipReportsAfterReturnFixture = {
+  ...shipReportsFixture,
+  items: [shipReportAfterReturnFixture],
+} satisfies ListReports
+
 export const earthReportsBeforeDeliveryFixture = {
   items: [],
   total: 0,
@@ -373,6 +399,13 @@ export const earthReportsAfterDeliveryFixture = {
   offset: 0,
 } satisfies ListReports
 
+export const earthReportsAfterReturnFixture = {
+  items: [{ ...earthDeliveredReportFixture, review_status: 'reviewed' }],
+  total: 1,
+  limit: 25,
+  offset: 0,
+} satisfies ListReports
+
 export const medicalReviewResultFixture = {
   review_id: 'REV-001',
   return_message_id: 'MSG-RETURN-001',
@@ -407,6 +440,8 @@ export const researchSourcesFixture = [
   },
 ] satisfies ResearchSource[]
 
+export const evaluationResultsFixture: EvaluationResult[] = []
+
 export const silverPulseFixturesV020 = {
   note: FIXTURE_NOTE,
   version: FIXTURE_CONTRACT_VERSION,
@@ -420,6 +455,10 @@ export const silverPulseFixturesV020 = {
   reportGenerateRequest: reportGenerateRequestFixture,
   shipReport: shipReportFixture,
   shipReports: shipReportsFixture,
+  shipReportAfterDelivery: shipReportAfterDeliveryFixture,
+  shipReportAfterReturn: shipReportAfterReturnFixture,
+  shipReportsAfterDelivery: shipReportsAfterDeliveryFixture,
+  shipReportsAfterReturn: shipReportsAfterReturnFixture,
   earthReportsBeforeDelivery: earthReportsBeforeDeliveryFixture,
   simulatorStatus: simulatorStatusFixture,
   simulatorMetrics: simulatorMetricsFixture,
@@ -429,7 +468,9 @@ export const silverPulseFixturesV020 = {
   trends: trendsFixture,
   countermeasures: countermeasuresFixture,
   earthReportsAfterDelivery: earthReportsAfterDeliveryFixture,
+  earthReportsAfterReturn: earthReportsAfterReturnFixture,
   medicalReviewResult: medicalReviewResultFixture,
   shipInboxAfterReturn: shipInboxAfterReturnFixture,
   researchSources: researchSourcesFixture,
+  evaluationResults: evaluationResultsFixture,
 }

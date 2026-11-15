@@ -1,7 +1,11 @@
 import type {
   Astronaut,
   Baseline,
+  CountermeasureLogInput,
   CountermeasurePlan,
+  EvaluationResult,
+  EvaluationRunInput,
+  EvaluationRunResult,
   ImportRequest,
   ImportResult,
   ListObservations,
@@ -13,8 +17,10 @@ import type {
   Readiness,
   Report,
   ReportGenerateInput,
+  SimulatorConfigInput,
   SimulatorMetrics,
   SimulatorStatus,
+  SimulatorStepInput,
   SingleObservationRequest,
   TrendSeries,
 } from '../types'
@@ -41,6 +47,11 @@ export interface ShipInbox {
 export interface MedicalReviewResult {
   review_id: string
   return_message_id: string
+  status: string
+}
+
+export interface CountermeasureLogResult {
+  id: string
   status: string
 }
 
@@ -84,6 +95,7 @@ export interface DataProvider {
   getShipTrends(astronautId: string, metricCode: string): Promise<TrendSeries>
   getReturnReadiness(astronautId: string): Promise<Readiness>
   getCountermeasures(astronautId: string): Promise<CountermeasurePlan[]>
+  logCountermeasure(astronautId: string, input: CountermeasureLogInput): Promise<CountermeasureLogResult>
   importObservations(input: ImportRequest): Promise<ImportResult>
   createShipObservation(input: SingleObservationRequest): Promise<Observation>
   getShipObservations(filters?: ObservationFilters): Promise<ListObservations>
@@ -96,7 +108,11 @@ export interface DataProvider {
   reviewEarthReport(reportId: string, input: MedicalReviewInput): Promise<MedicalReviewResult>
   getSimulatorStatus(): Promise<SimulatorStatus>
   getSimulatorMetrics(): Promise<SimulatorMetrics>
+  configureSimulator(input: SimulatorConfigInput): Promise<SimulatorStatus>
+  stepSimulator(input: SimulatorStepInput): Promise<SimulatorStatus>
   getResearchSources(): Promise<ResearchSource[]>
+  getEvaluationResults(): Promise<EvaluationResult[]>
+  runEvaluation(input: EvaluationRunInput): Promise<EvaluationRunResult>
 }
 
 export function resolveDataProviderMode(value = import.meta.env.VITE_DATA_PROVIDER): DataProviderMode {

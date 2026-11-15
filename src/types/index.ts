@@ -42,6 +42,11 @@ export type {
   ReviewStatus,
 } from './reports'
 export type {
+  EvaluationResult,
+  EvaluationRunInput,
+  EvaluationRunResult,
+} from './evaluation'
+export type {
   SimulatorConfigInput,
   SimulatorMetrics,
   SimulatorMode,

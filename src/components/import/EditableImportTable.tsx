@@ -9,7 +9,7 @@ interface EditableImportTableProps {
 }
 
 const fieldClassName =
-  'min-h-10 w-full min-w-28 rounded-control border border-line bg-card px-2.5 py-2 text-xs text-ink focus:border-nasa-blue'
+  'min-h-11 w-full min-w-28 rounded-control border border-line bg-card px-2.5 py-2 text-sm text-ink focus:border-nasa-blue'
 
 const phases: Array<{ value: MissionPhase; label: string }> = [
   { value: 'preflight', label: 'Pre-vuelo' },
@@ -139,7 +139,7 @@ export function EditableImportTable({ rows, metrics, errors, onChange }: Editabl
               ] as Array<[ImportDraftField, string]>).map(([field, label]) => {
                 const error = errorFor(errors, row.row, field)
                 return (
-                  <label key={field} className={`text-xs font-semibold text-ink ${field === 'observed_at_utc' ? 'sm:col-span-2' : ''}`}>
+                  <label key={field} className={`text-sm font-semibold text-ink ${field === 'observed_at_utc' ? 'sm:col-span-2' : ''}`}>
                     {label}
                     {field === 'metric_code' ? (
                       <select value={row[field]} aria-invalid={Boolean(error)} onChange={(event) => onChange(row.row, field, event.target.value)} className={`${fieldClassName} mt-1 ${error ? 'border-nasa-red' : ''}`}>

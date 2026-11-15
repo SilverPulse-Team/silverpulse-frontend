@@ -2,6 +2,7 @@ import type { DataProvider, DataProviderMetadata } from './dataProvider'
 import { ApiClient, type ApiClientOptions } from './apiClient'
 import { parseHealthStatus, parseMetricDefinitions } from './contractParsers'
 import { createEarthService } from './earth'
+import { createEvaluationService } from './evaluation'
 import { createResearchService } from './research'
 import { createShipService } from './ship'
 import { createSimulatorService } from './simulator'
@@ -12,6 +13,7 @@ export function createHttpDataProvider(options: ApiClientOptions = {}): DataProv
   const earth = createEarthService(client)
   const simulator = createSimulatorService(client)
   const research = createResearchService(client)
+  const evaluation = createEvaluationService(client)
   const metadata: DataProviderMetadata = {
     mode: 'http',
     contractVersion: '0.2.0',
@@ -30,6 +32,7 @@ export function createHttpDataProvider(options: ApiClientOptions = {}): DataProv
     getShipTrends: ship.getTrends,
     getReturnReadiness: ship.getReturnReadiness,
     getCountermeasures: ship.getCountermeasures,
+    logCountermeasure: ship.logCountermeasure,
     importObservations: ship.importObservations,
     createShipObservation: ship.createObservation,
     getShipObservations: ship.getObservations,
@@ -42,6 +45,10 @@ export function createHttpDataProvider(options: ApiClientOptions = {}): DataProv
     reviewEarthReport: earth.reviewReport,
     getSimulatorStatus: simulator.getStatus,
     getSimulatorMetrics: simulator.getMetrics,
+    configureSimulator: simulator.configure,
+    stepSimulator: simulator.step,
     getResearchSources: research.getSources,
+    getEvaluationResults: evaluation.getResults,
+    runEvaluation: evaluation.run,
   }
 }
