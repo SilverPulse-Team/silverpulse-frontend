@@ -39,7 +39,7 @@ export function ReadinessComparison({
   const metricCodes = Array.from(new Set(domains.flatMap((domain) => domain.evidence)))
 
   return (
-    <section aria-labelledby="readiness-comparison-title" className="rounded-card border border-line bg-card p-5 shadow-card lg:p-6">
+    <section aria-labelledby="readiness-comparison-title" className="min-w-0 rounded-card border border-line bg-card p-5 shadow-card lg:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-nasa-blue">Comparación documental</p>

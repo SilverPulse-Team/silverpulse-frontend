@@ -2,7 +2,7 @@
 
 Aplicación frontend de SilverPulse, un proyecto de NASA Space Apps Challenge 2026 orientado al monitoreo de la salud de astronautas.
 
-Este repositorio contiene la base técnica de la interfaz web. En esta etapa solo se prepara un proyecto mínimo y reproducible; todavía no incluye pantallas funcionales, autenticación, gráficas, sensores, lógica de negocio ni conexión con el backend.
+Este repositorio contiene el prototipo frontend de SilverPulse, con pantallas para nave, Mission Control, revisión médica y evidencia científica. El proveedor demo usa snapshots sintéticos; elegir un perfil no autentica al usuario y la interfaz no es un producto clínico ni una integración real con redes espaciales.
 
 ## Tecnologías
 
@@ -58,13 +58,15 @@ La salida de producción se genera en `dist/` y no se versiona.
 silverpulse-frontend/
 ├── public/             # Archivos estáticos servidos sin transformación
 ├── src/
-│   ├── assets/         # Recursos importados por la aplicación
-│   ├── components/     # Futuros componentes reutilizables de React
-│   ├── pages/          # Futuras vistas principales
-│   ├── services/       # Futuras funciones de comunicación con APIs
-│   ├── styles/         # Estilos globales y futuros archivos de diseño
-│   ├── App.tsx         # Componente raíz mínimo
+│   ├── app/            # Router y configuración de la aplicación
+│   ├── components/     # Componentes comunes y por dominio
+│   ├── mocks/          # Datos sintéticos v0.2.0 y proveedor mock
+│   ├── pages/          # Rutas de la aplicación
+│   ├── services/       # Cliente HTTP, proveedores y parsers de contrato
+│   ├── types/          # Tipos TypeScript del contrato
+│   ├── App.tsx         # Componente raíz
 │   └── main.tsx        # Punto de entrada y montaje de React
+├── docs/               # Contrato, guías demo y verificaciones
 ├── index.html          # Documento HTML de entrada para Vite
 ├── package.json        # Scripts y dependencias del proyecto
 ├── package-lock.json   # Versiones exactas para instalaciones reproducibles
@@ -72,11 +74,13 @@ silverpulse-frontend/
 └── vite.config.ts      # Configuración de Vite y React
 ```
 
-Los directorios todavía vacíos contienen un archivo `.gitkeep` para conservarlos en Git hasta que se añada su implementación.
-
 ## Variables de entorno
 
-Los archivos `.env` locales están excluidos de Git para evitar publicar información sensible. Cuando el proyecto necesite configuración por variables de entorno, se deberá documentar un archivo `.env.example` sin credenciales reales.
+Los archivos `.env` locales están excluidos de Git para evitar publicar información sensible. Crea la configuración local a partir del ejemplo versionado:
+
+```bash
+cp .env.example .env.local
+```
 
 El modo de datos se selecciona explícitamente desde una copia local de
 `.env.example`:
@@ -116,6 +120,11 @@ deshabilitando seguridad en el navegador.
 `GET /health` comprueba únicamente que el proceso de FastAPI responde. No indica
 que el enlace simulado con Tierra esté online; ese estado procede exclusivamente
 de `GET /simulator/status`.
+
+Consulta la [guía de integración API](./docs/api-integration.md) para el preflight
+de FastAPI y la matriz de endpoints, el [guion demo E2E](./docs/demo-e2e.md)
+para los pasos reproducibles y sus límites, y la [lista QA responsive](./docs/qa-responsive.md)
+para las comprobaciones realizadas.
 
 ## Navegación demo y control de acceso
 
