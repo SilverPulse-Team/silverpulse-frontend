@@ -4,6 +4,7 @@ import { AppShell } from './components/layout/AppShell'
 import { PageHeader } from './components/layout/PageHeader'
 import type { ShellEnvironment } from './components/layout/navigation'
 import { ConstructionState } from './components/states/ConstructionState'
+import { ComponentLibraryPage } from './pages/ComponentLibraryPage'
 
 const environmentOrder: ShellEnvironment[] = ['ship', 'earth', 'mission-control']
 const environmentStorageKey = 'silverpulse-demo-environment'
@@ -194,35 +195,8 @@ function App() {
               </span>
             }
           />
-          <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Vista previa del layout">
-            <article className="rounded-card border border-line bg-card p-5 shadow-card">
-              <p className="text-sm font-semibold text-nasa-blue">Navegación contextual</p>
-              <h2 className="mt-2 text-lg font-semibold">Entorno siempre visible</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                El menú cambia según nave, Tierra o control de misión y conserva Evidencia como sección compartida.
-              </p>
-            </article>
-            <article className="rounded-card border border-line bg-card p-5 shadow-card">
-              <p className="text-sm font-semibold text-nasa-blue">Responsive</p>
-              <h2 className="mt-2 text-lg font-semibold">Tres modos de navegación</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Sidebar completa en desktop, barra compacta en tablet y drawer accesible en móvil.
-              </p>
-            </article>
-            <article className="rounded-card border border-line bg-card p-5 shadow-card md:col-span-2 xl:col-span-1">
-              <p className="text-sm font-semibold text-nasa-blue">Separación operativa</p>
-              <h2 className="mt-2 text-lg font-semibold">Nave y Tierra no se mezclan</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                El estado offline describe el enlace de comunicación y no comunica peligro o condición clínica.
-              </p>
-            </article>
-          </section>
-
-          <div className="mt-6 rounded-card border border-data/30 bg-data/5 p-5">
-            <p className="text-sm font-semibold text-ink">Vista técnica FE-05</p>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              Usa «Cambiar entorno demo» al final del menú para revisar las variantes. Las páginas finales reemplazarán este contenido al configurar React Router en FE-07.
-            </p>
+          <div className="mt-6">
+            <ComponentLibraryPage />
           </div>
         </>
       ) : (
