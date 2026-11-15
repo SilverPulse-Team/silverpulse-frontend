@@ -84,9 +84,27 @@ function assertDefaultPagination(options?: PaginationOptions) {
   }
 }
 
-function assertObservationFilters(filters?: ObservationFilters) {
-  if (filters && Object.keys(filters).length > 0) {
-    throw new MockFixtureMismatchError('filtros de observaciones')
+function getFilteredObservations(filters: ObservationFilters = {}) {
+  const limit = filters.limit ?? 25
+  const offset = filters.offset ?? 0
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100 || !Number.isInteger(offset) || offset < 0) {
+    throw new MockFixtureMismatchError('paginación de observaciones')
+  }
+
+  const matchingItems = listObservationsFixture.items.filter((observation) => {
+    if (filters.astronaut_id && observation.astronaut_id !== filters.astronaut_id) return false
+    if (filters.metric_code && observation.metric_code !== filters.metric_code) return false
+    if (filters.phase && observation.phase !== filters.phase) return false
+    if (filters.source_kind && observation.source_kind !== filters.source_kind) return false
+    return true
+  })
+
+  return {
+    items: matchingItems.slice(offset, offset + limit),
+    total: matchingItems.length,
+    limit,
+    offset,
   }
 }
 
@@ -148,8 +166,7 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
     },
 
     async getShipObservations(filters?: ObservationFilters) {
-      assertObservationFilters(filters)
-      return clone(listObservationsFixture)
+      return clone(getFilteredObservations(filters))
     },
 
     async generateReport(input: ReportGenerateInput) {

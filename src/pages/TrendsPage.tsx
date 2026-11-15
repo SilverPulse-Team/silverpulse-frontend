@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { LongitudinalTrendChart } from '../components/charts/LongitudinalTrendChart'
 import { filterTrendPoints } from '../components/charts/trendFilters'
 import { PageHeader } from '../components/layout/PageHeader'
+import { HistoryTable } from '../components/observations/HistoryTable'
 import {
   AlertNotice,
   ChartPanel,
@@ -376,6 +377,11 @@ export function TrendsPage() {
           </AlertNotice>
         </>
       )}
+
+      <HistoryTable
+        astronautId={contextState.data.astronaut.id}
+        metrics={contextState.data.metrics}
+      />
     </div>
   )
 }
