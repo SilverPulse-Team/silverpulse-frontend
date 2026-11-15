@@ -1,11 +1,17 @@
 import { Menu, WifiOff } from 'lucide-react'
 import type { RefObject } from 'react'
+import { Link } from 'react-router'
 import { environmentConfig, type ShellEnvironment } from './navigation'
+
+export interface BreadcrumbItem {
+  label: string
+  href?: string
+}
 
 interface TopbarProps {
   environment: ShellEnvironment
   title: string
-  breadcrumb: string[]
+  breadcrumb: BreadcrumbItem[]
   onOpenMenu: () => void
   menuButtonRef: RefObject<HTMLButtonElement | null>
 }
@@ -31,9 +37,15 @@ export function Topbar({ environment, title, breadcrumb, onOpenMenu, menuButtonR
           <nav aria-label="Migas de pan" className="hidden sm:block">
             <ol className="flex items-center gap-2 text-xs text-muted">
               {breadcrumb.map((item, index) => (
-                <li key={`${item}-${index}`} className="flex items-center gap-2">
+                <li key={`${item.label}-${index}`} className="flex items-center gap-2">
                   {index > 0 && <span aria-hidden="true">/</span>}
-                  <span>{item}</span>
+                  {item.href ? (
+                    <Link to={item.href} className="rounded-sm hover:text-nasa-blue hover:underline">
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span aria-current={index === breadcrumb.length - 1 ? 'page' : undefined}>{item.label}</span>
+                  )}
                 </li>
               ))}
             </ol>

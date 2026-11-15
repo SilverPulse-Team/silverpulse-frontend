@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
-import { Topbar } from './Topbar'
+import { Topbar, type BreadcrumbItem } from './Topbar'
 import type { ShellEnvironment } from './navigation'
 
 interface AppShellProps {
   environment: ShellEnvironment
   activePath: string
   title: string
-  breadcrumb: string[]
+  breadcrumb: BreadcrumbItem[]
   children: ReactNode
   fitViewport?: boolean
   onChangeEnvironment?: () => void
