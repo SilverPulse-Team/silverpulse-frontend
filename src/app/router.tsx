@@ -7,33 +7,13 @@ import { AstronautOverviewPage } from '../pages/AstronautOverviewPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
-
-const environmentOrder: ShellEnvironment[] = ['ship', 'earth', 'mission-control']
-const environmentStorageKey = 'silverpulse-demo-environment'
-
-const environmentHome: Record<ShellEnvironment, string> = {
-  ship: '/astronaut',
-  earth: '/medical',
-  'mission-control': '/mission-control',
-}
+import { LoginPage } from '../pages/LoginPage'
+import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironment } from './demoEnvironment'
 
 interface RouteInfo {
   title: string
   breadcrumb: BreadcrumbItem[]
   fitViewport: boolean
-}
-
-function getInitialEnvironment(): ShellEnvironment {
-  try {
-    const storedEnvironment = window.sessionStorage.getItem(environmentStorageKey)
-    if (environmentOrder.includes(storedEnvironment as ShellEnvironment)) {
-      return storedEnvironment as ShellEnvironment
-    }
-  } catch {
-    // Session storage may be unavailable; ship remains the safe demo default.
-  }
-
-  return 'ship'
 }
 
 function breadcrumbFor(environment: ShellEnvironment, currentLabel: string, sectionLabel?: string): BreadcrumbItem[] {
@@ -104,7 +84,16 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
 }
 
 export function AppRouter() {
-  const [environment, setEnvironment] = useState<ShellEnvironment>(getInitialEnvironment)
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/*" element={<ShellRouter />} />
+    </Routes>
+  )
+}
+
+function ShellRouter() {
+  const [environment, setEnvironment] = useState<ShellEnvironment>(getStoredEnvironment)
   const location = useLocation()
   const navigate = useNavigate()
   const routeInfo = resolveRouteInfo(location.pathname, environment)
@@ -114,12 +103,7 @@ export function AppRouter() {
     const currentIndex = environmentOrder.indexOf(environment)
     const nextEnvironment = environmentOrder[(currentIndex + 1) % environmentOrder.length]
 
-    try {
-      window.sessionStorage.setItem(environmentStorageKey, nextEnvironment)
-    } catch {
-      // The environment still changes for this page if storage is unavailable.
-    }
-
+    storeEnvironment(nextEnvironment)
     setEnvironment(nextEnvironment)
     navigate(environmentHome[nextEnvironment], { replace: true })
   }
@@ -135,10 +119,6 @@ export function AppRouter() {
     >
       <Routes>
         <Route path="/" element={<Navigate to="/astronaut" replace />} />
-        <Route
-          path="/login"
-          element={<PlaceholderPage viewName="Acceso demostrativo" description="Permitirá elegir un perfil ficticio de nave o Tierra sin presentar una autenticación clínica inexistente." />}
-        />
         <Route
           path="/astronaut"
           element={
