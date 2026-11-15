@@ -1,14 +1,19 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Navigate, Route, Routes, matchPath, useLocation, useNavigate } from 'react-router'
 import { AppShell } from '../components/layout/AppShell'
 import type { BreadcrumbItem } from '../components/layout/Topbar'
 import type { ShellEnvironment } from '../components/layout/navigation'
+import { LoadingSkeleton } from '../components/ui'
 import { AstronautOverviewPage } from '../pages/AstronautOverviewPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
 import { LoginPage } from '../pages/LoginPage'
 import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironment } from './demoEnvironment'
+
+const TrendsPage = lazy(() =>
+  import('../pages/TrendsPage').then((module) => ({ default: module.TrendsPage })),
+)
 
 interface RouteInfo {
   title: string
@@ -49,7 +54,7 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
 
   if (exactRoutes[path]) {
     const route = exactRoutes[path]
-    return { title: 'SilverPulse', breadcrumb: breadcrumbFor(environment, route.label, route.section), fitViewport: true }
+    return { title: 'SilverPulse', breadcrumb: breadcrumbFor(environment, route.label, route.section), fitViewport: path !== '/astronaut/trends' }
   }
 
   if (path === '/mission-control') {
@@ -135,7 +140,11 @@ function ShellRouter() {
         />
         <Route
           path="/astronaut/trends"
-          element={<PlaceholderPage viewName="Tendencias fisiológicas" description="Contendrá comparaciones longitudinales por fase, fuente, calidad y contexto de actividad." />}
+          element={
+            <Suspense fallback={<LoadingSkeleton rows={7} label="Cargando módulo de tendencias" />}>
+              <TrendsPage />
+            </Suspense>
+          }
         />
         <Route
           path="/astronaut/return"
