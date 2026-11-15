@@ -9,6 +9,7 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
 import { LoginPage } from '../pages/LoginPage'
+import { ImportPage } from '../pages/ImportPage'
 import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironment } from './demoEnvironment'
 
 const TrendsPage = lazy(() =>
@@ -54,7 +55,11 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
 
   if (exactRoutes[path]) {
     const route = exactRoutes[path]
-    return { title: 'SilverPulse', breadcrumb: breadcrumbFor(environment, route.label, route.section), fitViewport: path !== '/astronaut/trends' }
+    return {
+      title: 'SilverPulse',
+      breadcrumb: breadcrumbFor(environment, route.label, route.section),
+      fitViewport: path !== '/astronaut/trends' && path !== '/astronaut/import',
+    }
   }
 
   if (path === '/mission-control') {
@@ -136,7 +141,7 @@ function ShellRouter() {
         />
         <Route
           path="/astronaut/import"
-          element={<PlaceholderPage viewName="Importar observaciones" description="Contendrá la importación guiada de registros con procedencia, unidad, calidad, fase y fecha conocidas." />}
+          element={<ImportPage />}
         />
         <Route
           path="/astronaut/trends"
