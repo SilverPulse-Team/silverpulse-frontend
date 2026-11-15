@@ -33,6 +33,11 @@ textarea {
   font: inherit;
 }
 
+.sidebar-label {
+  font-size: 13px;
+  line-height: 1.25rem;
+}
+
 :focus-visible {
   outline: 3px solid var(--sp-color-data);
   outline-offset: 3px;

@@ -86,7 +86,7 @@ export function Sidebar({
 
       <div className="px-3 py-4">
         <div
-          className={`flex min-h-11 items-center gap-2 rounded-control border border-data/35 bg-midnight-surface px-3 text-sm font-medium text-slate-100 ${
+          className={`sidebar-label flex min-h-11 items-center gap-2 rounded-control border border-data/35 bg-midnight-surface px-3 font-medium text-slate-100 ${
             showLabels ? 'justify-start' : 'justify-center'
           }`}
           title={config.label}
@@ -108,7 +108,7 @@ export function Sidebar({
                   onClick={onClose}
                   aria-current={isActive ? 'page' : undefined}
                   title={label}
-                  className={`flex min-h-11 items-center gap-3 rounded-control px-3 text-sm font-normal transition-colors ${
+                  className={`sidebar-label flex min-h-11 items-center gap-3 rounded-control px-3 font-medium transition-colors ${
                     showLabels ? 'justify-start' : 'justify-center'
                   } ${
                     isActive
@@ -129,7 +129,7 @@ export function Sidebar({
         <button
           type="button"
           onClick={onChangeEnvironment}
-          className={`flex min-h-11 w-full items-center gap-3 rounded-control px-3 text-sm font-normal text-slate-300 transition-colors hover:bg-white/10 hover:text-white ${
+          className={`sidebar-label flex min-h-11 w-full items-center gap-3 rounded-control px-3 font-normal text-slate-300 transition-colors hover:bg-white/10 hover:text-white ${
             showLabels ? 'justify-start' : 'justify-center'
           }`}
           title="Cambiar entorno demo"
