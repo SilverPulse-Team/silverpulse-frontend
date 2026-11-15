@@ -3,7 +3,7 @@ import { DataSourceBadge } from './DataSourceBadge'
 import { MissionPhaseBadge } from './MissionPhaseBadge'
 import { QualityBadge } from './QualityBadge'
 import { TimeStamp } from './TimeStamp'
-import type { DataQuality, DataSourceKind, MissionPhase } from './types'
+import type { MissionPhase } from './types'
 
 interface MetricCardBase {
   label: string
@@ -13,17 +13,17 @@ interface MetricCardBase {
 interface MetricCardWithValue extends MetricCardBase {
   value: string | number
   unit: string
-  source: DataSourceKind
-  quality: DataQuality
+  source: string
+  quality: string
   phase: MissionPhase
   observedAt: string | Date
 }
 
 interface MetricCardWithoutValue extends MetricCardBase {
   value: null
+  quality?: string
   unit?: never
   source?: never
-  quality?: never
   phase?: never
   observedAt?: never
 }
@@ -60,7 +60,10 @@ export function MetricCard(props: MetricCardProps) {
           <TimeStamp value={props.observedAt} />
         </div>
       ) : (
-        <p className="mt-4 border-t border-line pt-4 text-sm text-muted">Evidencia insuficiente</p>
+        <div className="mt-4 space-y-3 border-t border-line pt-4">
+          {props.quality && <QualityBadge quality={props.quality} />}
+          <p className="text-sm text-muted">Evidencia insuficiente · unidad, fuente y fecha no disponibles</p>
+        </div>
       )}
     </article>
   )

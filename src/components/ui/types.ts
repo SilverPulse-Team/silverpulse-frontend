@@ -1,8 +1,4 @@
-export type DataSourceKind = 'synthetic' | 'public_dataset' | 'wearable' | 'clinical'
-
-export type DataQuality = 'adequate' | 'unknown' | 'not_applicable'
-
-export type MissionPhase = 'pre_flight' | 'in_flight' | 'post_flight'
+export type { DataSourceKind, MissionPhase, ObservationQuality as DataQuality } from '../../types'
 
 export type SyncStatus =
   | 'recorded_ship'

@@ -44,7 +44,7 @@ const observations: ObservationRow[] = [
     observedAt: '2026-11-14T15:00:00Z',
     source: 'synthetic',
     quality: 'adequate',
-    phase: 'in_flight',
+    phase: 'inflight',
   },
   {
     id: 'OBS-0002',
@@ -54,7 +54,7 @@ const observations: ObservationRow[] = [
     observedAt: '2026-11-14T06:00:00Z',
     source: 'synthetic',
     quality: 'unknown',
-    phase: 'in_flight',
+    phase: 'inflight',
   },
 ]
 
@@ -89,7 +89,7 @@ export function ComponentLibraryPage() {
             unit="bpm"
             source="synthetic"
             quality="adequate"
-            phase="in_flight"
+            phase="inflight"
             observedAt="2026-11-14T15:00:00Z"
             helperText="Una observación no demuestra una tendencia."
           />
@@ -99,7 +99,7 @@ export function ComponentLibraryPage() {
             unit="min"
             source="synthetic"
             quality="unknown"
-            phase="in_flight"
+            phase="inflight"
             observedAt="2026-11-14T06:00:00Z"
             helperText="6 h 12 min · Bajo referencia personal."
           />
@@ -114,7 +114,7 @@ export function ComponentLibraryPage() {
           <QualityBadge quality="unknown" />
           <QualityBadge quality="not_applicable" />
           <DataSourceBadge source="synthetic" />
-          <MissionPhaseBadge phase="in_flight" />
+          <MissionPhaseBadge phase="inflight" />
           <SyncStatusBadge status="queued" />
           <SyncStatusBadge status="delivered_earth" />
           <SyncStatusBadge status="reviewed" />
