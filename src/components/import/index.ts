@@ -1,4 +1,5 @@
 export * from './EditableImportTable'
 export * from './ImportStepper'
+export * from './ImportResult'
 export * from './PreviewTable'
 export * from './SourceSelector'

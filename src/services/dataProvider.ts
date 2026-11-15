@@ -8,12 +8,14 @@ import type {
   ListReports,
   MedicalReviewInput,
   MetricDefinition,
+  Observation,
   Overview,
   Readiness,
   Report,
   ReportGenerateInput,
   SimulatorMetrics,
   SimulatorStatus,
+  SingleObservationRequest,
   TrendSeries,
 } from '../types'
 
@@ -83,6 +85,7 @@ export interface DataProvider {
   getReturnReadiness(astronautId: string): Promise<Readiness>
   getCountermeasures(astronautId: string): Promise<CountermeasurePlan[]>
   importObservations(input: ImportRequest): Promise<ImportResult>
+  createShipObservation(input: SingleObservationRequest): Promise<Observation>
   getShipObservations(filters?: ObservationFilters): Promise<ListObservations>
   generateReport(input: ReportGenerateInput): Promise<Report>
   getShipReports(options?: PaginationOptions): Promise<ListReports>

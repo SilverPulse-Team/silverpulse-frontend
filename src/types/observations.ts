@@ -49,6 +49,12 @@ export interface ImportRequest {
   observations: ObservationInput[]
 }
 
+export interface SingleObservationRequest {
+  astronaut_id: string
+  source: DataSource
+  observation: ObservationInput
+}
+
 export interface ImportError {
   row: number
   code: string
