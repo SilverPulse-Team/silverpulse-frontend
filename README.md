@@ -46,6 +46,7 @@ Vite mostrará en la terminal la dirección local de la aplicación, normalmente
 npm run dev      # Inicia el servidor de desarrollo
 npm run build    # Verifica TypeScript y genera la compilación de producción
 npm run lint     # Ejecuta la revisión estática del código
+npm test         # Ejecuta las pruebas automatizadas una vez
 npm run preview  # Sirve localmente la compilación de producción
 ```
 

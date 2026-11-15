@@ -1,6 +1,7 @@
 import type {
   ImportRequest,
   ReportGenerateInput,
+  SingleObservationRequest,
 } from '../types'
 import type { ObservationFilters, PaginationOptions } from './dataProvider'
 import type { ApiClient } from './apiClient'
@@ -12,6 +13,7 @@ import {
   parseListObservations,
   parseListReports,
   parseOverview,
+  parseObservation,
   parseReadiness,
   parseReport,
   parseShipInbox,
@@ -47,6 +49,9 @@ export function createShipService(client: ApiClient) {
 
     importObservations: (input: ImportRequest) =>
       client.post('/ship/observations/import', input, parseImportResult),
+
+    createObservation: (input: SingleObservationRequest) =>
+      client.post('/ship/observations', input, parseObservation),
 
     getObservations: (filters: ObservationFilters = {}) =>
       client.get('/ship/observations', parseListObservations, {
