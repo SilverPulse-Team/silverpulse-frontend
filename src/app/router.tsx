@@ -19,6 +19,9 @@ import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironme
 const TrendsPage = lazy(() =>
   import('../pages/TrendsPage').then((module) => ({ default: module.TrendsPage })),
 )
+const EvidencePage = lazy(() =>
+  import('../pages/EvidencePage').then((module) => ({ default: module.EvidencePage })),
+)
 
 interface RouteInfo {
   title: string
@@ -165,7 +168,11 @@ function ShellRouter() {
         <Route path="/astronaut/reports/:id" element={<ShipReportDetailPage />} />
         <Route
           path="/evidence"
-          element={<PlaceholderPage viewName="Evidencia y metodología" description="Contendrá fuentes públicas, metodología reproducible, resultados ejecutados y limitaciones del prototipo." />}
+          element={
+            <Suspense fallback={<LoadingSkeleton rows={6} label="Cargando evidencia científica" />}>
+              <EvidencePage />
+            </Suspense>
+          }
         />
         <Route path="*" element={<NotFoundPage homePath={environmentHome[environment]} />} />
       </Routes>

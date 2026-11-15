@@ -11,6 +11,7 @@ import type {
   ImportRequest,
   CountermeasureLogInput,
   CountermeasurePlan,
+  EvaluationRunResult,
   MedicalReviewInput,
   Observation,
   ReportGenerateInput,
@@ -26,6 +27,7 @@ import {
   earthReportsAfterDeliveryFixture,
   earthReportsAfterReturnFixture,
   earthReportsBeforeDeliveryFixture,
+  evaluationResultsFixture,
   emptyShipInboxFixture,
   healthFixture,
   listObservationsFixture,
@@ -341,6 +343,14 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
 
     async getResearchSources() {
       return clone(researchSourcesFixture)
+    },
+
+    async getEvaluationResults() {
+      return clone(evaluationResultsFixture)
+    },
+
+    async runEvaluation(): Promise<EvaluationRunResult> {
+      throw new MockOperationUnavailableError('la ejecución de evaluaciones comparativas')
     },
   }
 }

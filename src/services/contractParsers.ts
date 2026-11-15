@@ -2,6 +2,8 @@ import type {
   Astronaut,
   Baseline,
   CountermeasurePlan,
+  EvaluationResult,
+  EvaluationRunResult,
   ImportResult,
   ListObservations,
   ListReports,
@@ -45,6 +47,10 @@ const integerValue: Validator = (value, path) => {
 
 const booleanValue: Validator = (value, path) => {
   if (typeof value !== 'boolean') fail(path, 'boolean')
+}
+
+const recordValue: Validator = (value, path) => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) fail(path, 'object')
 }
 
 const nullValue: Validator = (value, path) => {
@@ -345,6 +351,19 @@ const researchSource = objectOf({
   relevance: required(stringValue),
 })
 
+const evaluationResult = objectOf({
+  run_id: required(stringValue),
+  sample_n: required(integerValue),
+  metrics: required(recordValue),
+})
+
+const evaluationRunResult = objectOf({
+  run_id: required(stringValue),
+  fixture_id: required(stringValue),
+  sample_n: required(integerValue),
+  metrics: required(recordValue),
+})
+
 export const parseHealthStatus = parser<HealthStatus>(objectOf({
   status: required(stringValue),
   demo_mode: required(booleanValue),
@@ -374,3 +393,5 @@ export const parseMedicalReviewResult = parser<MedicalReviewResult>(objectOf({
 export const parseSimulatorStatus = parser<SimulatorStatus>(simulatorStatus)
 export const parseSimulatorMetrics = parser<SimulatorMetrics>(simulatorMetrics)
 export const parseResearchSources = parser<ResearchSource[]>(arrayOf(researchSource))
+export const parseEvaluationResults = parser<EvaluationResult[]>(arrayOf(evaluationResult))
+export const parseEvaluationRunResult = parser<EvaluationRunResult>(evaluationRunResult)

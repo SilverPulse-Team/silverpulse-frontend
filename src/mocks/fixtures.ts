@@ -3,6 +3,7 @@ import type {
   Astronaut,
   Baseline,
   CountermeasurePlan,
+  EvaluationResult,
   ImportRequest,
   ImportResult,
   ListObservations,
@@ -439,6 +440,8 @@ export const researchSourcesFixture = [
   },
 ] satisfies ResearchSource[]
 
+export const evaluationResultsFixture: EvaluationResult[] = []
+
 export const silverPulseFixturesV020 = {
   note: FIXTURE_NOTE,
   version: FIXTURE_CONTRACT_VERSION,
@@ -469,4 +472,5 @@ export const silverPulseFixturesV020 = {
   medicalReviewResult: medicalReviewResultFixture,
   shipInboxAfterReturn: shipInboxAfterReturnFixture,
   researchSources: researchSourcesFixture,
+  evaluationResults: evaluationResultsFixture,
 }

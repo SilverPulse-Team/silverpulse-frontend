@@ -3,6 +3,9 @@ import type {
   Baseline,
   CountermeasureLogInput,
   CountermeasurePlan,
+  EvaluationResult,
+  EvaluationRunInput,
+  EvaluationRunResult,
   ImportRequest,
   ImportResult,
   ListObservations,
@@ -108,6 +111,8 @@ export interface DataProvider {
   configureSimulator(input: SimulatorConfigInput): Promise<SimulatorStatus>
   stepSimulator(input: SimulatorStepInput): Promise<SimulatorStatus>
   getResearchSources(): Promise<ResearchSource[]>
+  getEvaluationResults(): Promise<EvaluationResult[]>
+  runEvaluation(input: EvaluationRunInput): Promise<EvaluationRunResult>
 }
 
 export function resolveDataProviderMode(value = import.meta.env.VITE_DATA_PROVIDER): DataProviderMode {
