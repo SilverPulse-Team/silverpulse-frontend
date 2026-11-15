@@ -1,0 +1,46 @@
+:root {
+  --sp-color-nasa-blue: #0b3d91;
+  --sp-color-nasa-red: #fc3d21;
+  --sp-color-deep-space: #08182e;
+  --sp-color-midnight-surface: #10243f;
+  --sp-color-background: #f4f7fb;
+  --sp-color-card: #ffffff;
+  --sp-color-text-primary: #17263c;
+  --sp-color-text-secondary: #64748b;
+  --sp-color-border: #dee6ef;
+  --sp-color-data: #2687c9;
+  --sp-color-coverage: #15877a;
+  --sp-color-notice: #b7791f;
+
+  --sp-radius-card: 0.75rem;
+  --sp-radius-control: 0.5rem;
+  --sp-shadow-card: 0 1px 2px rgb(8 24 46 / 6%), 0 8px 24px rgb(8 24 46 / 5%);
+
+  --sp-space-1: 0.5rem;
+  --sp-space-2: 1rem;
+  --sp-space-3: 1.5rem;
+  --sp-space-4: 2rem;
+  --sp-space-5: 2.5rem;
+  --sp-space-6: 3rem;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --color-nasa-blue: var(--sp-color-nasa-blue);
+  --color-nasa-red: var(--sp-color-nasa-red);
+  --color-deep-space: var(--sp-color-deep-space);
+  --color-midnight-surface: var(--sp-color-midnight-surface);
+  --color-canvas: var(--sp-color-background);
+  --color-card: var(--sp-color-card);
+  --color-ink: var(--sp-color-text-primary);
+  --color-muted: var(--sp-color-text-secondary);
+  --color-line: var(--sp-color-border);
+  --color-data: var(--sp-color-data);
+  --color-coverage: var(--sp-color-coverage);
+  --color-notice: var(--sp-color-notice);
+
+  --radius-card: var(--sp-radius-card);
+  --radius-control: var(--sp-radius-control);
+  --shadow-card: var(--sp-shadow-card);
+}

@@ -1,10 +1,7 @@
+import { AppRouter } from './app/router'
+
 function App() {
-  return (
-    <main>
-      <h1>SilverPulse</h1>
-      <p>Frontend initialized successfully.</p>
-    </main>
-  )
+  return <AppRouter />
 }
 
 export default App
