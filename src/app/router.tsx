@@ -180,7 +180,7 @@ export function AppRouter() {
           path="/evidence"
           element={<PlaceholderPage viewName="Evidencia y metodología" description="Contendrá fuentes públicas, metodología reproducible, resultados ejecutados y limitaciones del prototipo." />}
         />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="*" element={<NotFoundPage homePath={environmentHome[environment]} />} />
       </Routes>
     </AppShell>
   )
