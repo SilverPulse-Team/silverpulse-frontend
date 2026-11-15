@@ -19,10 +19,9 @@ import {
   type DragEvent,
 } from 'react'
 import {
+  EditableImportTable,
   ImportStepper,
-  PreviewTable,
   SourceSelector,
-  type ImportPreviewRow,
   type ImportSourceType,
 } from '../components/import'
 import { PageHeader } from '../components/layout/PageHeader'
@@ -35,7 +34,18 @@ import {
   SecondaryButton,
 } from '../components/ui'
 import { getDataProvider } from '../services'
-import type { Astronaut, DataSourceKind, MetricDefinition, MissionPhase } from '../types'
+import type { Astronaut, DataSource, DataSourceKind, MetricDefinition, MissionPhase } from '../types'
+import {
+  buildImportRequest,
+  mapObservations,
+  parseCsv,
+  parseJson,
+  validateImportRows,
+  type ImportDraftField,
+  type ImportDraftRow,
+  type ImportParseError,
+  type ParsedImportRow,
+} from '../utils/import'
 
 interface ImportContext {
   astronauts: Astronaut[]
@@ -94,30 +104,34 @@ function extensionFor(source: ImportSourceType | null) {
   return source === 'csv' ? '.csv' : source === 'json' ? '.json' : ''
 }
 
-function buildSyntheticPreview(metrics: MetricDefinition[]): ImportPreviewRow[] {
-  const rows = [
+function buildSyntheticRows(metrics: MetricDefinition[]): ImportDraftRow[] {
+  const parsedRows: ParsedImportRow[] = [
     {
       row: 1,
-      metricCode: 'heart_rate',
-      value: 71,
-      observedAtUtc: '2026-11-14T15:00:00Z',
-      quality: 'adequate' as const,
+      values: {
+        metric_code: 'heart_rate',
+        value: 71,
+        unit: metrics.find((metric) => metric.code === 'heart_rate')?.unit ?? '',
+        observed_at_utc: '2026-11-14T15:00:00Z',
+        phase: 'inflight',
+        quality: 'adequate',
+        activity_context: 'rest',
+      },
     },
     {
       row: 2,
-      metricCode: 'sleep_duration',
-      value: 372,
-      observedAtUtc: '2026-11-14T06:00:00Z',
-      quality: 'unknown' as const,
+      values: {
+        metric_code: 'sleep_duration',
+        value: 372,
+        unit: metrics.find((metric) => metric.code === 'sleep_duration')?.unit ?? '',
+        observed_at_utc: '2026-11-14T06:00:00Z',
+        phase: 'inflight',
+        quality: 'unknown',
+        activity_context: 'sleep',
+      },
     },
   ]
-
-  return rows.flatMap((row) => {
-    const metric = metrics.find((candidate) => candidate.code === row.metricCode)
-    if (!metric) return []
-
-    return [{ ...row, metricLabel: metric.label, unit: metric.unit, sourceKind: 'synthetic' as const }]
-  })
+  return mapObservations(parsedRows, { phase: 'inflight', quality: 'unknown', activity_context: 'rest' })
 }
 
 export function ImportPage() {
@@ -128,6 +142,8 @@ export function ImportPage() {
   const [form, setForm] = useState<FormState>(defaultForm)
   const [file, setFile] = useState<File | null>(null)
   const [previewState, setPreviewState] = useState<PreviewState>('idle')
+  const [draftRows, setDraftRows] = useState<ImportDraftRow[]>([])
+  const [parseErrors, setParseErrors] = useState<ImportParseError[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
   const [notice, setNotice] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -161,14 +177,29 @@ export function ImportPage() {
     }
   }, [contextVersion])
 
-  const previewRows = useMemo(
-    () => (
-      sourceType === 'synthetic' && contextState.status === 'ready'
-        ? buildSyntheticPreview(contextState.data.metrics)
-        : []
-    ),
-    [contextState, sourceType],
+  const metrics = useMemo(
+    () => contextState.status === 'ready' ? contextState.data.metrics : [],
+    [contextState],
   )
+  const validation = useMemo(
+    () => validateImportRows(draftRows, metrics, form.sourceKind),
+    [draftRows, form.sourceKind, metrics],
+  )
+  const source: DataSource = useMemo(() => ({
+    id: form.sourceId.trim(),
+    kind: form.sourceKind,
+    provider: form.provider.trim(),
+    device_model: null,
+    license: null,
+    citation: null,
+    is_synthetic: sourceType === 'synthetic',
+  }), [form.provider, form.sourceId, form.sourceKind, sourceType])
+  const requestResult = useMemo(() => buildImportRequest({
+    astronautId: form.astronautId,
+    source,
+    rows: draftRows,
+    metrics,
+  }), [draftRows, form.astronautId, metrics, source])
 
   const resetFlow = useCallback(() => {
     const firstAstronaut = contextState.status === 'ready' ? contextState.data.astronauts[0]?.id ?? '' : ''
@@ -177,6 +208,8 @@ export function ImportPage() {
     setForm({ ...defaultForm, astronautId: firstAstronaut })
     setFile(null)
     setPreviewState('idle')
+    setDraftRows([])
+    setParseErrors([])
     setErrors({})
     setNotice('Importación cancelada. No se registraron ni enviaron datos.')
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -187,6 +220,8 @@ export function ImportPage() {
     setErrors({})
     setNotice('')
     setFile(null)
+    setDraftRows([])
+    setParseErrors([])
     if (fileInputRef.current) fileInputRef.current.value = ''
 
     if (nextSource === 'synthetic') {
@@ -196,6 +231,7 @@ export function ImportPage() {
         sourceId: 'SCENARIO-001',
         sourceKind: 'synthetic',
       }))
+      if (contextState.status === 'ready') setDraftRows(buildSyntheticRows(contextState.data.metrics))
       setPreviewState('ready')
       return
     }
@@ -234,10 +270,19 @@ export function ImportPage() {
     setFile(candidate)
     setPreviewState('loading')
     try {
-      await candidate.text()
+      const content = await candidate.text()
+      const parsed = sourceType === 'csv' ? parseCsv(content) : parseJson(content)
+      setParseErrors(parsed.errors)
+      setDraftRows(mapObservations(parsed.rows, {
+        phase: form.phase,
+        quality: 'unknown',
+        activity_context: form.activity,
+      }))
       setPreviewState('ready')
     } catch {
       setFile(null)
+      setDraftRows([])
+      setParseErrors([])
       setPreviewState('idle')
       setErrors((previous) => ({ ...previous, file: 'No fue posible leer el archivo local.' }))
     }
@@ -269,6 +314,10 @@ export function ImportPage() {
 
   const advance = () => {
     if (currentStep === 1 && !validateSelection()) return
+    if (currentStep === 3 && (parseErrors.length > 0 || validation.errors.length > 0 || draftRows.length === 0)) {
+      setNotice('Corrige los errores indicados antes de confirmar el JSON canónico.')
+      return
+    }
     setNotice('')
     setCurrentStep((step) => Math.min(4, step + 1))
   }
@@ -276,6 +325,10 @@ export function ImportPage() {
   const goBack = () => {
     setNotice('')
     setCurrentStep((step) => Math.max(1, step - 1))
+  }
+
+  const updateDraftRow = (rowNumber: number, field: ImportDraftField, value: string) => {
+    setDraftRows((rows) => rows.map((row) => row.row === rowNumber ? { ...row, [field]: value } : row))
   }
 
   if (contextState.status === 'loading') {
@@ -304,6 +357,7 @@ export function ImportPage() {
   }
 
   const isSynthetic = sourceType === 'synthetic'
+  const localIssueCount = parseErrors.length + validation.errors.length + (draftRows.length === 0 ? 1 : 0)
 
   return (
     <div className="space-y-6 pb-24 sm:pb-6">
@@ -325,7 +379,7 @@ export function ImportPage() {
 
       <p className="sr-only" aria-live="polite">{notice}</p>
       {notice && (
-        <AlertNotice title="Flujo reiniciado">
+        <AlertNotice title="Estado del flujo">
           <p>{notice}</p>
         </AlertNotice>
       )}
@@ -436,6 +490,7 @@ export function ImportPage() {
                   id="import-file"
                   type="file"
                   accept={extensionFor(sourceType)}
+                  onClick={(event) => { event.currentTarget.value = '' }}
                   onChange={handleFileChange}
                   className="sr-only"
                 />
@@ -483,19 +538,35 @@ export function ImportPage() {
 
           {previewState === 'loading' ? (
             <LoadingSkeleton rows={4} label="Preparando vista previa del archivo" />
-          ) : isSynthetic ? (
-            <PreviewTable rows={previewRows} />
+          ) : draftRows.length > 0 ? (
+            <EditableImportTable
+              rows={draftRows}
+              metrics={contextState.data.metrics}
+              errors={validation.errors}
+              onChange={updateDraftRow}
+            />
           ) : (
             <section className="rounded-card border border-line bg-card p-6 shadow-card">
               <EmptyState
-                title="Archivo preparado para mapeo"
-                description={`${file?.name ?? 'El archivo'} superó la revisión de extensión y contenido vacío. FE-17 incorporará el parser y mostrará aquí cada fila real; todavía no se deducen ni inventan observaciones.`}
+                title="Sin filas para mapear"
+                description="El archivo no produjo observaciones editables. Revisa los errores de formato o selecciona otro archivo."
               />
             </section>
           )}
 
-          <AlertNotice title="Mapeo canónico previsto">
-            <p><span className="font-mono">metric_code, value, unit, observed_at_utc, phase, quality</span> y <span className="font-mono">activity_context</span>. El parsing y los errores por fila se implementarán en FE-17.</p>
+          {parseErrors.length > 0 && (
+            <div role="alert" className="rounded-card border border-nasa-red/25 bg-nasa-red/5 p-5">
+              <h3 className="font-semibold text-ink">Errores de estructura del archivo</h3>
+              <ul className="mt-3 space-y-2 text-sm text-muted">
+                {parseErrors.map((error, index) => (
+                  <li key={`${error.row}-${error.code}-${index}`}><span className="font-semibold text-nasa-red">Fila {error.row} · {error.code}:</span> {error.detail}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <AlertNotice title="Mapeo canónico activo">
+            <p>Las columnas reconocidas se asignan a <span className="font-mono">metric_code, value, unit, observed_at_utc, phase, quality</span> y <span className="font-mono">activity_context</span>. El registro original se conserva en <span className="font-mono">context.original_record</span>.</p>
           </AlertNotice>
         </section>
       )}
@@ -506,25 +577,41 @@ export function ImportPage() {
             <h2 id="validation-heading" className="text-lg font-semibold text-ink">3. Validación local</h2>
             <p className="mt-1 text-sm leading-6 text-muted">Esta etapa aún no envía datos al backend.</p>
           </div>
-          {isSynthetic ? (
+          {parseErrors.length === 0 && validation.errors.length === 0 && draftRows.length > 0 ? (
             <div className="rounded-card border border-coverage/30 bg-coverage/5 p-5">
               <div className="flex items-start gap-3">
                 <CheckCircle2 aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-coverage" />
                 <div>
-                  <h3 className="font-semibold text-ink">{previewRows.length} filas listas · 0 errores locales</h3>
-                  <p className="mt-1 text-sm leading-6 text-muted">Las métricas y unidades coinciden con el catálogo cargado. Esto no es todavía una respuesta de FastAPI.</p>
+                  <h3 className="font-semibold text-ink">{validation.validRows.length} filas válidas · 0 errores locales</h3>
+                  <p className="mt-1 text-sm leading-6 text-muted">Métricas, unidades, fechas, fases, calidades y fuente coinciden con el contrato y catálogo cargados. Esto aún no es una respuesta de FastAPI.</p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-card border border-notice/35 bg-notice/10 p-5">
+            <div role="alert" className="rounded-card border border-nasa-red/25 bg-nasa-red/5 p-5">
               <div className="flex items-start gap-3">
-                <TriangleAlert aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-notice" />
+                <TriangleAlert aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-nasa-red" />
                 <div>
-                  <h3 className="font-semibold text-ink">Validación de filas pendiente de FE-17</h3>
-                  <p className="mt-1 text-sm leading-6 text-muted">El archivo es legible y tiene la extensión correcta. No se afirmará que sus filas son válidas hasta implementar el parser canónico.</p>
+                  <h3 className="font-semibold text-ink">Corrige el archivo antes de confirmar</h3>
+                  <p className="mt-1 text-sm leading-6 text-muted">{validation.validRows.length} filas válidas · {localIssueCount} problemas detectados.</p>
                 </div>
               </div>
+              <ul className="mt-4 space-y-2 border-t border-nasa-red/15 pt-4 text-sm text-muted">
+                {parseErrors.map((error, index) => (
+                  <li key={`parse-${error.row}-${error.code}-${index}`}><span className="font-semibold text-nasa-red">Fila {error.row} · {error.code}:</span> {error.detail}</li>
+                ))}
+                {validation.errors.map((error, index) => (
+                  <li key={`validation-${error.row}-${error.code}-${index}`}><span className="font-semibold text-nasa-red">Fila {error.row} · {error.field}:</span> {error.detail}</li>
+                ))}
+                {draftRows.length === 0 && (
+                  <li><span className="font-semibold text-nasa-red">Archivo:</span> No hay filas de observación disponibles para confirmar.</li>
+                )}
+              </ul>
+              {validation.errors.length > 0 && (
+                <SecondaryButton type="button" onClick={() => setCurrentStep(2)} className="mt-4">
+                  Corregir filas
+                </SecondaryButton>
+              )}
             </div>
           )}
           <div className="grid gap-3 sm:grid-cols-3">
@@ -546,18 +633,27 @@ export function ImportPage() {
               <FlaskConical aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-notice" />
               <div>
                 <p className="font-semibold text-ink">ESCENARIO SINTÉTICO · SCENARIO-001</p>
-                <p className="mt-1 text-sm leading-6 text-muted">{previewRows.length} registros ficticios de SilverPulse demo para {form.astronautId}. No son datos médicos reales.</p>
+                <p className="mt-1 text-sm leading-6 text-muted">{draftRows.length} registros ficticios de SilverPulse demo para {form.astronautId}. No son datos médicos reales.</p>
               </div>
             </div>
           )}
           {!isSynthetic && (
             <div className="rounded-card border border-line bg-canvas p-5">
               <p className="text-sm font-semibold text-ink">Archivo local · {file?.name}</p>
-              <p className="mt-1 text-sm leading-6 text-muted">Proveedor {form.provider}; fuente {form.sourceId}. El archivo aún no fue convertido ni enviado.</p>
+              <p className="mt-1 text-sm leading-6 text-muted">Proveedor {form.provider}; fuente {form.sourceId}. El archivo fue convertido localmente a JSON y todavía no fue enviado.</p>
+            </div>
+          )}
+          {requestResult.request && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-ink">ImportRequest listo para POST /ship/observations/import</h3>
+                <span className="rounded-full bg-coverage/10 px-3 py-1 text-xs font-semibold text-coverage">application/json</span>
+              </div>
+              <pre className="mt-3 max-h-96 overflow-auto rounded-card bg-deep-space p-4 text-xs leading-5 text-slate-100" tabIndex={0}>{JSON.stringify(requestResult.request, null, 2)}</pre>
             </div>
           )}
           <AlertNotice title="Publicación todavía deshabilitada">
-            <p>FE-16 termina en una confirmación revisable. FE-17 producirá el JSON canónico y FE-18 conectará el envío con protección contra doble clic.</p>
+            <p>FE-17 termina con un JSON canónico revisable. FE-18 conectará el POST, interpretará aceptados/rechazados y protegerá contra doble clic.</p>
           </AlertNotice>
           <PrimaryButton type="button" disabled className="w-full sm:w-auto">
             Validar y registrar
