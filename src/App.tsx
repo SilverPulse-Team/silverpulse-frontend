@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { AppShell } from './components/layout/AppShell'
 import { PageHeader } from './components/layout/PageHeader'
 import type { ShellEnvironment } from './components/layout/navigation'
 import { ConstructionState } from './components/states/ConstructionState'
 
 const environmentOrder: ShellEnvironment[] = ['ship', 'earth', 'mission-control']
+const environmentStorageKey = 'silverpulse-demo-environment'
 
 interface ViewContent {
   title: string
@@ -15,9 +17,15 @@ interface ViewContent {
 }
 
 function getInitialEnvironment(): ShellEnvironment {
-  const path = window.location.pathname
-  if (path.startsWith('/medical')) return 'earth'
-  if (path.startsWith('/mission-control')) return 'mission-control'
+  try {
+    const storedEnvironment = window.sessionStorage.getItem(environmentStorageKey)
+    if (environmentOrder.includes(storedEnvironment as ShellEnvironment)) {
+      return storedEnvironment as ShellEnvironment
+    }
+  } catch {
+    // Session storage may be unavailable; ship remains the safe demo default.
+  }
+
   return 'ship'
 }
 
@@ -92,7 +100,34 @@ const pendingViews: Record<string, ViewContent> = {
 }
 
 function resolveView(path: string, environment: ShellEnvironment): ViewContent {
-  if (path === '/' || path === '/astronaut') return previewContent.ship
+  if (path === '/' || path === '/astronaut') {
+    if (environment === 'mission-control') {
+      return {
+        title: 'Resumen de nave',
+        eyebrow: 'Simulador local',
+        description: 'Vista resumida del entorno nave disponible desde Mission Control.',
+        breadcrumb: ['SilverPulse', 'Mission Control', 'Resumen de nave'],
+        implemented: false,
+      }
+    }
+
+    return previewContent.ship
+  }
+
+  if (path === '/mission-control') {
+    if (environment === 'ship') {
+      return {
+        title: 'Comunicaciones',
+        eyebrow: 'Entorno nave',
+        description: 'Mensajes y estados de sincronización entre la nave y Tierra.',
+        breadcrumb: ['SilverPulse', 'Nave', 'Comunicaciones'],
+        implemented: false,
+      }
+    }
+
+    return previewContent['mission-control']
+  }
+
   if (pendingViews[path]) return pendingViews[path]
 
   if (path.startsWith('/astronaut/reports/')) {
@@ -120,14 +155,21 @@ function resolveView(path: string, environment: ShellEnvironment): ViewContent {
 
 function App() {
   const [environment, setEnvironment] = useState<ShellEnvironment>(getInitialEnvironment)
-  const path = window.location.pathname
+  const location = useLocation()
+  const navigate = useNavigate()
+  const path = location.pathname
   const current = resolveView(path, environment)
   const activePath = path === '/' ? previewContent.ship.path : path
 
   const changeEnvironment = () => {
     const currentIndex = environmentOrder.indexOf(environment)
     const nextEnvironment = environmentOrder[(currentIndex + 1) % environmentOrder.length]
-    window.history.replaceState(null, '', previewContent[nextEnvironment].path)
+    try {
+      window.sessionStorage.setItem(environmentStorageKey, nextEnvironment)
+    } catch {
+      // Navigation still works for this page even when storage is unavailable.
+    }
+    navigate(previewContent[nextEnvironment].path, { replace: true })
     setEnvironment(nextEnvironment)
   }
 

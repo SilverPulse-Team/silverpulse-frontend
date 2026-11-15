@@ -1,4 +1,5 @@
 import { Activity, ArrowLeftRight, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
+import { Link } from 'react-router'
 import { environmentConfig, type ShellEnvironment } from './navigation'
 
 interface SidebarProps {
@@ -33,8 +34,8 @@ export function Sidebar({
         }`}
       >
         {showLabels ? (
-          <a
-            href={homePath}
+          <Link
+            to={homePath}
             onClick={mobile ? onClose : undefined}
             className="flex min-h-11 items-center gap-3 rounded-control focus-visible:outline-offset-4"
             aria-label={`SilverPulse, ir a ${config.label}`}
@@ -44,7 +45,7 @@ export function Sidebar({
               <span className="block text-base font-semibold tracking-tight">SilverPulse</span>
               <span className="block text-[11px] tracking-wide text-slate-300">Mission Health</span>
             </span>
-          </a>
+          </Link>
         ) : (
           <button
             type="button"
@@ -103,8 +104,8 @@ export function Sidebar({
 
             return (
               <li key={href}>
-                <a
-                  href={href}
+                <Link
+                  to={href}
                   onClick={onClose}
                   aria-current={isActive ? 'page' : undefined}
                   title={label}
@@ -118,7 +119,7 @@ export function Sidebar({
                 >
                   <Icon aria-hidden="true" className="size-5 shrink-0" />
                   {showLabels && <span>{label}</span>}
-                </a>
+                </Link>
               </li>
             )
           })}
