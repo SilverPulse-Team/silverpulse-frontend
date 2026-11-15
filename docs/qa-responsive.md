@@ -2,8 +2,7 @@
 
 ## Matriz de viewport
 
-Se inspeccionaron las rutas siguientes en 1440×900, 834×900 (tablet dentro del
-rango solicitado de 768–1023 px) y 390×844:
+Se inspeccionaron las rutas siguientes en 1440×900, 768×900 y 390×844:
 
 | Ruta | Áreas revisadas |
 | --- | --- |
@@ -19,16 +18,21 @@ rango solicitado de 768–1023 px) y 390×844:
 | `/evidence` | Fuentes, metodología y limitaciones |
 
 En las 30 combinaciones, el ancho de `documentElement` coincidió con el
-viewport: no se observó overflow horizontal de página. Las tablas anchas
-conservan scroll horizontal dentro de su contenedor; ese scroll es intencional.
+viewport: no se observó overflow horizontal de página. El sidebar mide 240 px
+en desktop, se colapsa en tablet y se reemplaza por menú en móvil. Las tablas
+anchas conservan scroll horizontal dentro de su contenedor; ese scroll es
+intencional.
 La revisión inicial encontró overflow en `/astronaut/return` a 390 px, corregido
 con `min-w-0` en la cuadrícula y el comparador, y la matriz se repitió después.
 
 ## Accesibilidad comprobada y pendiente
 
-- En `/astronaut/import` a 390 px, el primer Tab enfocó «Abrir menú» con un
-  contorno visible de 3 px.
-- Los controles visibles medidos en esa vista alcanzaron al menos 44×44 px; se
+- En `/astronaut/import` a 390 px, el menú abre un diálogo con nombre accesible
+  y `aria-modal`; un evento Escape lo cierra y devuelve el foco al botón
+  «Abrir menú». La secuencia nativa completa por teclado no se pudo validar
+  con el navegador de esta sesión.
+- En los pasos de origen y mapeo de `/astronaut/import` a 390 px, los botones
+  y controles de formulario visibles medidos alcanzan al menos 44×44 px; se
   excluyeron los inputs de archivo nativos ocultos de 1×1 px.
 - El selector de fuente y los pasos del import tienen nombres/roles accesibles.
   La tabla móvil usa controles etiquetados; las tablas incluyen captions y
@@ -43,10 +47,9 @@ con `min-w-0` en la cuadrícula y el comparador, y la matriz se repitió despué
 ## Estados y pruebas automatizadas
 
 La suite Vitest cubre datos nulos (`Sin datos`), etiqueta sintética, una
-observación sin línea, baseline con `n=12`, el escenario de importación con fases
-preflight/inflight y controles de Mission Control deshabilitados durante un POST
-pendiente. El repositorio también mantiene pruebas de errores de importación y
-estados de sincronización.
+observación sin línea, baseline con `n=12`, la importación de valores/fases oficiales y controles de
+Mission Control deshabilitados durante un POST pendiente. El repositorio también
+mantiene pruebas de errores de importación y estados de sincronización.
 
 Última ejecución registrada: `npm test` — 21 archivos y 82 pruebas correctas;
 `npm run build` y `npm run lint` correctos. La ejecución no requiere hardware ni

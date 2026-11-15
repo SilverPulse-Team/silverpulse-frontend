@@ -139,7 +139,7 @@ function buildSyntheticRows(metrics: MetricDefinition[]): ImportDraftRow[] {
         value: 71,
         unit: metrics.find((metric) => metric.code === 'heart_rate')?.unit ?? '',
         observed_at_utc: '2026-11-14T15:00:00Z',
-        phase: 'preflight',
+        phase: 'inflight',
         quality: 'adequate',
         activity_context: 'rest',
       },

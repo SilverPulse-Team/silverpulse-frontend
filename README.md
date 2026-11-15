@@ -97,11 +97,16 @@ bandeja médica de Tierra.
 
 Las páginas deben consumir la interfaz común de `src/services/dataProvider.ts`,
 obtenida mediante `getDataProvider()`, en lugar de importar fixtures directamente.
-Esto permite sustituir el proveedor mock por HTTP sin reescribir los componentes.
+Esta fase usa exclusivamente el proveedor mock. El proveedor HTTP está preparado
+para una etapa futura, pero no se debe activar ni apuntar a un backend ahora.
 
-### FastAPI local
+### Integración futura con FastAPI (no activar en esta fase)
 
-Para consumir el backend en lugar de los fixtures:
+`src/services/httpDataProvider.ts` y sus parsers se conservan para una futura
+integración aprobada con FastAPI v0.2.0. Durante la implementación frontend se
+debe mantener `VITE_DATA_PROVIDER=mock`; no cambiarlo a `http` ni ejecutar
+solicitudes a endpoints reales. La base URL siguiente es solo una referencia
+futura:
 
 ```bash
 VITE_DATA_PROVIDER=http
@@ -117,9 +122,9 @@ FastAPI debe permitir CORS para el origen de desarrollo de Vite, normalmente
 header `Content-Type`. Esta configuración se realiza en el backend; no se resuelve
 deshabilitando seguridad en el navegador.
 
-`GET /health` comprueba únicamente que el proceso de FastAPI responde. No indica
-que el enlace simulado con Tierra esté online; ese estado procede exclusivamente
-de `GET /simulator/status`.
+Cuando se autorice esa etapa, `GET /health` comprobará únicamente que FastAPI
+responde; no indicará que el enlace simulado con Tierra esté online. Ese estado
+procederá exclusivamente de `GET /simulator/status`.
 
 Consulta la [guía de integración API](./docs/api-integration.md) para el preflight
 de FastAPI y la matriz de endpoints, el [guion demo E2E](./docs/demo-e2e.md)

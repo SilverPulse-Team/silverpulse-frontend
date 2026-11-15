@@ -1,15 +1,19 @@
-# Integración frontend–FastAPI
+# Preparación para integración frontend–FastAPI
 
-## Configuración
+## Fase actual: solo MOCK
 
-El frontend selecciona un proveedor al iniciar. Para usar los snapshots de demo:
+Esta fase frontend usa exclusivamente los snapshots oficiales del contrato
+v0.2.0. `getDataProvider()` resuelve a mock por defecto y `.env.example` define
+`VITE_DATA_PROVIDER=mock`. No cambiarlo a `http`, no iniciar llamadas a una API
+real y no usar las rutas de este documento como funcionalidad disponible.
 
-```env
-VITE_DATA_PROVIDER=mock
-VITE_MOCK_SCENARIO=offline
-```
+El proveedor HTTP, sus parsers y las pruebas con `fetch` simulado se mantienen
+como preparación; las pruebas no conectan con FastAPI.
 
-Para apuntar al backend local, configura `.env.local` (no versionar secretos):
+## Configuración reservada para una fase futura
+
+Solo después de confirmar FastAPI y aprobar la integración se podría configurar
+`.env.local` con:
 
 ```env
 VITE_DATA_PROVIDER=http
@@ -51,8 +55,21 @@ HTTP se conservan como errores de operación y no se convierten en éxito mock.
 
 ## Estado de verificación de este Epic
 
-Durante esta verificación no hubo un servidor FastAPI respondiendo en
-`localhost:8000`. Por ello no se pudieron confirmar `/docs`, `/openapi.json`,
-`GET /health`, CORS ni payloads reales. El proveedor HTTP y su validación de
-contratos existen en frontend, pero FE-34 permanece pendiente de una
-comprobación backend y no debe marcarse como integración real verificada.
+No se ejecutaron solicitudes a un servidor FastAPI durante esta fase frontend.
+Por ello `/docs`, `/openapi.json`, `GET /health`, CORS y payloads reales siguen
+sin verificar. El proveedor HTTP existe como preparación, no como integración
+funcional habilitada.
+
+## Entradas guiadas de IA: punto de integración futuro
+
+El módulo Python `silverpulse_ai/inputs/` no forma parte de este repositorio y no
+se ha confirmado un endpoint para consumirlo. No portar sus reglas a TypeScript,
+crear rutas ni representar respuestas de IA en el mock.
+
+Cuando exista un contrato/API aprobados, integrar primero los tipos de respuesta
+en `src/types/` y el servicio en `src/services/`; después presentar preguntas
+cerradas en el flujo frontend que defina el contrato (por ejemplo, junto a la
+captura de observaciones), manteniendo sus opciones y validaciones derivadas de
+la especificación. Renderizar `reliable`, `repeat` e `insufficient` únicamente
+como estados recibidos y validados desde esa respuesta, nunca calculados por la
+interfaz. Hasta entonces, esas preguntas y estados quedan fuera de alcance.

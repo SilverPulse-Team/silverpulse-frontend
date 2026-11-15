@@ -10,10 +10,10 @@ está satisfecho. No se creó PR ni se declara cerrado el Epic.
 
 | Issue | Estado | Evidencia y limitaciones |
 | --- | --- | --- |
-| FE-34 · HTTP real/contratos | Parcial, bloqueado por FastAPI | El proveedor HTTP centralizado, servicios y parsers v0.2.0 están implementados. No hubo backend en `localhost:8000`; no se verificaron CORS, payloads reales ni diferencias contra OpenAPI. |
-| FE-35 · Pruebas unitarias/contrato | Implementado en frontend | Testing Library y jsdom están instalados; `npm test` completó 21 archivos y 82 pruebas. Incluye null, `is_synthetic`, n=1, baseline n=12, fases preflight/inflight, errores y POST pendiente. |
+| FE-34 · HTTP real/contratos | Pendiente para una fase futura | La arquitectura HTTP centralizada y parsers v0.2.0 están preparados. En esta fase no se consumen endpoints reales ni se conectó FastAPI. |
+| FE-35 · Pruebas unitarias/contrato | Implementado en frontend | Testing Library y jsdom están instalados; `npm test` completó 21 archivos y 82 pruebas. Incluye null, `is_synthetic`, n=1, baseline n=12, los valores y fases exactos del fixture oficial, errores y POST pendiente. |
 | FE-36 · Responsive/accesibilidad/estados | Parcial | 10 rutas en 3 tamaños sin overflow global; se reparó un overflow móvil. Hay verificaciones puntuales de teclado y targets en importación; auditoría WCAG, lector de pantalla y revisión exhaustiva de contraste pendientes. |
-| FE-37 · E2E/demo/PR | Parcial, bloqueado por FastAPI | La importación mock se completó antes de añadir la fase preflight al escenario. El test automatizado verifica el escenario mixto actualizado. Sin backend no se pudo completar entrega, revisión médica ni retorno reales. Guion documentado; PR no creado. |
+| FE-37 · E2E/demo/PR | Parcial para esta fase | El flujo mock se mantiene en los datos oficiales. El fixture de observaciones no incluye un registro individual preflight, así que no se fabrica uno para satisfacer el guion. El E2E de entrega/revisión/retorno pertenece a la futura fase backend; PR no creado. |
 
 ## Criterios del issue padre #54
 
@@ -31,21 +31,17 @@ está satisfecho. No se creó PR ni se declara cerrado el Epic.
 - `npm run build` — correcto (TypeScript y Vite).
 - `npm run lint` — correcto.
 - `git diff --check` — resultado registrado después de la documentación.
-- Navegador: 10 rutas × 3 tamaños (1440×900, 834×900 y 390×844), sin overflow
+- Navegador: 10 rutas × 3 tamaños (1440×900, 768×900 y 390×844), sin overflow
   horizontal del documento.
-- `/astronaut/import` a 390×844: selección sintética con una fila preflight y
-  otra inflight, validación local, 2 aceptadas/0 rechazadas por el provider
-  mock e historial local actualizado a 4 observaciones. El frontend informó
-  explícitamente que no persistió.
-- El test de `ImportPage` protege que el escenario sintético mantenga ambas
-  fases.
+- El test de `ImportPage` protege los valores y la fase inflight exactos del
+  fixture oficial; no convierte el baseline preflight en un registro medido.
 
 ## Pendiente antes de cerrar
 
-1. Iniciar FastAPI v0.2.0 y verificar CORS, `/docs`/`openapi.json`, health y
-   payloads reales.
-2. Repetir la importación manual con el escenario actualizado y ejecutar la
-   secuencia completa hasta retorno de la nota.
+1. Cuando se apruebe la fase backend, verificar CORS, `/docs`/`openapi.json`,
+   health y payloads reales contra el contrato.
+2. Solo con fixtures oficiales para las fases necesarias, ejecutar la secuencia
+   completa hasta retorno de la nota; no derivar mediciones de baselines.
 3. Completar revisión accesible (lector de pantalla, contraste y teclado en
    toda la navegación) y las condiciones clínicas sintéticas/ACK/IA que soporte
    el backend.

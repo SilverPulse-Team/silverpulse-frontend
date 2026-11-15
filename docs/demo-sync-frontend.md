@@ -1,5 +1,8 @@
 # Guía demostrativa de SilverPulse Sync
 
+> Guía de referencia para una fase futura de integración. En la fase frontend
+> actual, conserva `VITE_DATA_PROVIDER=mock` y no ejecutes solicitudes a FastAPI.
+
 ## Alcance y límites
 
 `/mission-control` presenta una simulación local de enlace diferido; no es una red espacial real ni una integración NASA DTN/ION-DTN. El diagrama muestra la ruta lógica `spacecraft.db → outbox → enlace simulado → recepción → earth.db`; no conecta bases de datos.

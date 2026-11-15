@@ -61,7 +61,7 @@ export function AppShell({
     <div className={`${fitViewport ? 'h-dvh overflow-hidden' : 'min-h-screen'} bg-canvas text-ink`}>
       <aside
         className={`fixed inset-y-0 left-0 z-30 hidden transition-[width] duration-200 md:block ${
-          isSidebarExpanded ? 'w-[272px]' : 'w-20'
+          isSidebarExpanded ? 'w-[240px]' : 'w-20'
         }`}
       >
         <Sidebar
@@ -104,7 +104,7 @@ export function AppShell({
 
       <div
         className={`min-w-0 transition-[padding] duration-200 ${fitViewport ? 'h-dvh overflow-hidden' : ''} ${
-          isSidebarExpanded ? 'md:pl-[272px]' : 'md:pl-20'
+          isSidebarExpanded ? 'md:pl-[240px]' : 'md:pl-20'
         }`}
       >
         <Topbar

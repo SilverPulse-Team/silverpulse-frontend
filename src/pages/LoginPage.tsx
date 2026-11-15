@@ -144,7 +144,7 @@ function RoleCard({
       <button
         type="button"
         onClick={() => onSelect(environment)}
-        className="mt-2.5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-nasa-blue px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-deep-space sm:mt-4 sm:text-sm"
+        className="mt-2.5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-nasa-blue px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-deep-space sm:mt-4"
       >
         {buttonLabel}
         <ArrowRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-1" />

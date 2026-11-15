@@ -53,7 +53,7 @@ export function Topbar({ environment, title, breadcrumb, onOpenMenu, menuButtonR
 
         <div className="hidden items-center gap-3 border-l border-line pl-4 sm:flex">
           <div className="hidden text-right lg:block">
-            <p className="text-xs font-semibold text-ink">{config.role}</p>
+            <p className="text-sm font-semibold text-ink">{config.role}</p>
             <p className="max-w-52 truncate text-xs text-muted">{config.profile}</p>
           </div>
           <span
