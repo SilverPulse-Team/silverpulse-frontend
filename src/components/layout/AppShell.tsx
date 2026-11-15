@@ -21,7 +21,20 @@ export function AppShell({
   onChangeEnvironment,
 }: AppShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() =>
+    window.matchMedia('(min-width: 1024px)').matches,
+  )
   const menuButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia('(min-width: 1024px)')
+    const syncSidebarWithViewport = (event: MediaQueryListEvent) => {
+      setIsSidebarExpanded(event.matches)
+    }
+
+    desktopQuery.addEventListener('change', syncSidebarWithViewport)
+    return () => desktopQuery.removeEventListener('change', syncSidebarWithViewport)
+  }, [])
 
   useEffect(() => {
     if (!isMenuOpen) return
@@ -44,10 +57,16 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-20 md:block lg:w-60">
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 hidden transition-[width] duration-200 md:block ${
+          isSidebarExpanded ? 'w-[272px]' : 'w-20'
+        }`}
+      >
         <Sidebar
           environment={environment}
           activePath={activePath}
+          expanded={isSidebarExpanded}
+          onToggleExpanded={() => setIsSidebarExpanded((current) => !current)}
           onChangeEnvironment={onChangeEnvironment}
         />
       </aside>
@@ -68,6 +87,7 @@ export function AppShell({
           >
             <Sidebar
               mobile
+              expanded
               environment={environment}
               activePath={activePath}
               onClose={() => setIsMenuOpen(false)}
@@ -80,7 +100,11 @@ export function AppShell({
         </div>
       )}
 
-      <div className="min-w-0 md:pl-20 lg:pl-60">
+      <div
+        className={`min-w-0 transition-[padding] duration-200 ${
+          isSidebarExpanded ? 'md:pl-[272px]' : 'md:pl-20'
+        }`}
+      >
         <Topbar
           environment={environment}
           title={title}
