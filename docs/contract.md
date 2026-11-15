@@ -14,10 +14,12 @@ generador OpenAPI. Se separan por dominio y `src/types/index.ts` ofrece un únic
 punto de importación. Cada cambio del YAML exige actualizar estos tipos y comprobar
 el proyecto con `npm run build`.
 
-TypeScript comprueba la forma estática de los fixtures de FE-10, pero no valida en
-tiempo de ejecución restricciones como `format: date-time`, mínimos, máximos o
-`exclusiveMinimum`. El cliente HTTP deberá validar la respuesta antes de afirmarla
-como un tipo del contrato.
+TypeScript comprueba la forma estática de los fixtures de FE-10. El cliente HTTP de
+FE-11 valida en tiempo de ejecución la estructura, propiedades requeridas, nulos,
+tipos y enums antes de devolver una respuesta tipada. Restricciones semánticas como
+`format: date-time`, mínimos, máximos o `exclusiveMinimum` siguen siendo
+responsabilidad primaria del backend y deben añadirse al parser si el frontend
+necesita tomar decisiones basadas en ellas.
 
 ## Nulos y opcionales
 

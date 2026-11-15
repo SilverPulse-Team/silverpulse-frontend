@@ -88,12 +88,33 @@ VITE_MOCK_SCENARIO=offline
 Los escenarios disponibles son `offline`, `after-delivery` y `after-return`.
 Todos reproducen snapshots sintéticos del contrato v0.2.0; no guardan datos ni
 confirman ACK reales. `offline` es el valor predeterminado y mantiene vacía la
-bandeja médica de Tierra. El modo `http` queda reservado para el cliente de FE-11
-y el programa falla de forma explícita si se selecciona antes de implementarlo.
+bandeja médica de Tierra.
 
 Las páginas deben consumir la interfaz común de `src/services/dataProvider.ts`,
 obtenida mediante `getDataProvider()`, en lugar de importar fixtures directamente.
 Esto permite sustituir el proveedor mock por HTTP sin reescribir los componentes.
+
+### FastAPI local
+
+Para consumir el backend en lugar de los fixtures:
+
+```bash
+VITE_DATA_PROVIDER=http
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+```
+
+Las variables `VITE_*` quedan visibles en el bundle del navegador y nunca deben
+contener tokens, contraseñas ni otros secretos. El cliente no incluye credenciales
+por defecto.
+
+FastAPI debe permitir CORS para el origen de desarrollo de Vite, normalmente
+`http://localhost:5173`, incluyendo los métodos `GET`, `POST` y `OPTIONS` y el
+header `Content-Type`. Esta configuración se realiza en el backend; no se resuelve
+deshabilitando seguridad en el navegador.
+
+`GET /health` comprueba únicamente que el proceso de FastAPI responde. No indica
+que el enlace simulado con Tierra esté online; ese estado procede exclusivamente
+de `GET /simulator/status`.
 
 ## Navegación demo y control de acceso
 

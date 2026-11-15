@@ -1,4 +1,5 @@
 import { createMockDataProvider } from '../mocks/mockApi'
+import { createHttpDataProvider } from './httpDataProvider'
 import type { DataProvider } from './dataProvider'
 import { resolveDataProviderMode, resolveMockScenario } from './dataProvider'
 
@@ -16,6 +17,8 @@ export type {
   ShipInboxMessage,
 } from './dataProvider'
 export { resolveDataProviderMode, resolveMockScenario } from './dataProvider'
+export { ApiClient, ApiClientError, resolveApiBaseUrl } from './apiClient'
+export { createHttpDataProvider } from './httpDataProvider'
 
 let provider: DataProvider | undefined
 
@@ -26,9 +29,8 @@ export function getDataProvider(): DataProvider {
 
   const mode = resolveDataProviderMode()
   if (mode === 'http') {
-    throw new Error(
-      'VITE_DATA_PROVIDER="http" requiere el cliente HTTP de FE-11. Usa "mock" hasta implementarlo.',
-    )
+    provider = createHttpDataProvider()
+    return provider
   }
 
   provider = createMockDataProvider({ scenario: resolveMockScenario() })
