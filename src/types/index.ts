@@ -26,6 +26,7 @@ export type {
   Readiness,
   ReadinessDomain,
   ReadinessDomainCode,
+  SingleObservationRequest,
   TrendPoint,
   TrendSeries,
 } from './observations'

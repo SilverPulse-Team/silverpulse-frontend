@@ -61,7 +61,10 @@ export function EditableImportTable({ rows, metrics, errors, onChange }: Editabl
           <tbody className="divide-y divide-line">
             {rows.map((row) => (
               <tr key={row.row} className={errors.some((error) => error.row === row.row) ? 'bg-nasa-red/[0.025]' : ''}>
-                <th scope="row" className="px-3 py-3 align-top font-mono text-xs text-muted">{row.row}</th>
+                <th scope="row" className="px-3 py-3 align-top font-mono text-xs text-muted">
+                  {row.row}
+                  <FieldError error={errors.find((error) => error.row === row.row && error.field === 'row')} />
+                </th>
                 <td className="px-3 py-3 align-top">
                   <select
                     aria-label={`Métrica de la fila ${row.row}`}
@@ -123,6 +126,7 @@ export function EditableImportTable({ rows, metrics, errors, onChange }: Editabl
               <p className="font-mono text-xs font-semibold text-nasa-blue">FILA {row.row}</p>
               {errors.some((error) => error.row === row.row) && <span className="text-xs font-semibold text-nasa-red">Requiere corrección</span>}
             </div>
+            <FieldError error={errors.find((error) => error.row === row.row && error.field === 'row')} />
             <div className="grid gap-3 sm:grid-cols-2">
               {([
                 ['metric_code', 'Métrica'],

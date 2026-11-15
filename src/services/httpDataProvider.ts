@@ -31,6 +31,7 @@ export function createHttpDataProvider(options: ApiClientOptions = {}): DataProv
     getReturnReadiness: ship.getReturnReadiness,
     getCountermeasures: ship.getCountermeasures,
     importObservations: ship.importObservations,
+    createShipObservation: ship.createObservation,
     getShipObservations: ship.getObservations,
     generateReport: ship.generateReport,
     getShipReports: ship.getReports,

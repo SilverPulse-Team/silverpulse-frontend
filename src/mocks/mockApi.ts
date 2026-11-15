@@ -7,7 +7,13 @@ import type {
   PaginationOptions,
   ShipInbox,
 } from '../services/dataProvider'
-import type { ImportRequest, MedicalReviewInput, ReportGenerateInput } from '../types'
+import type {
+  ImportRequest,
+  MedicalReviewInput,
+  Observation,
+  ReportGenerateInput,
+  SingleObservationRequest,
+} from '../types'
 import {
   astronautsFixture,
   baselinesFixture,
@@ -16,8 +22,6 @@ import {
   earthReportsBeforeDeliveryFixture,
   emptyShipInboxFixture,
   healthFixture,
-  importRequestFixture,
-  importResultFixture,
   listObservationsFixture,
   medicalReviewRequestFixture,
   medicalReviewResultFixture,
@@ -84,7 +88,7 @@ function assertDefaultPagination(options?: PaginationOptions) {
   }
 }
 
-function getFilteredObservations(filters: ObservationFilters = {}) {
+function getFilteredObservations(observations: Observation[], filters: ObservationFilters = {}) {
   const limit = filters.limit ?? 25
   const offset = filters.offset ?? 0
 
@@ -92,7 +96,7 @@ function getFilteredObservations(filters: ObservationFilters = {}) {
     throw new MockFixtureMismatchError('paginación de observaciones')
   }
 
-  const matchingItems = listObservationsFixture.items.filter((observation) => {
+  const matchingItems = observations.filter((observation) => {
     if (filters.astronaut_id && observation.astronaut_id !== filters.astronaut_id) return false
     if (filters.metric_code && observation.metric_code !== filters.metric_code) return false
     if (filters.phase && observation.phase !== filters.phase) return false
@@ -117,6 +121,30 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
     scenario,
     persistence: 'simulated',
     acknowledgements: 'simulated',
+  }
+  const storedObservations: Observation[] = clone(listObservationsFixture.items)
+  let nextObservationNumber = storedObservations.length + 1
+
+  const storeObservation = (input: SingleObservationRequest): Observation => {
+    const id = `OBS-MOCK-${String(nextObservationNumber).padStart(4, '0')}`
+    nextObservationNumber += 1
+    const observation: Observation = {
+      id,
+      astronaut_id: input.astronaut_id,
+      metric_code: input.observation.metric_code,
+      value: input.observation.value,
+      unit: input.observation.unit,
+      observed_at_utc: input.observation.observed_at_utc,
+      phase: input.observation.phase,
+      quality: input.observation.quality,
+      source_kind: input.source.kind,
+      source_id: input.source.id,
+      device_model: input.source.device_model ?? null,
+      activity_context: input.observation.activity_context ?? null,
+      is_synthetic: input.source.is_synthetic,
+    }
+    storedObservations.push(observation)
+    return observation
   }
 
   return {
@@ -161,12 +189,25 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
     },
 
     async importObservations(input: ImportRequest) {
-      assertFixtureRequest(input, importRequestFixture, 'importación de observaciones')
-      return clone(importResultFixture)
+      const observationIds = input.observations.map((observation) => storeObservation({
+        astronaut_id: input.astronaut_id,
+        source: input.source,
+        observation,
+      }).id)
+      return {
+        accepted: observationIds.length,
+        rejected: 0,
+        observation_ids: observationIds,
+        errors: [],
+      }
+    },
+
+    async createShipObservation(input: SingleObservationRequest) {
+      return clone(storeObservation(input))
     },
 
     async getShipObservations(filters?: ObservationFilters) {
-      return clone(getFilteredObservations(filters))
+      return clone(getFilteredObservations(storedObservations, filters))
     },
 
     async generateReport(input: ReportGenerateInput) {

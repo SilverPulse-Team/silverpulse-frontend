@@ -20,6 +20,7 @@ import {
 } from 'react'
 import {
   EditableImportTable,
+  ImportResult,
   ImportStepper,
   SourceSelector,
   type ImportSourceType,
@@ -34,16 +35,27 @@ import {
   SecondaryButton,
 } from '../components/ui'
 import { getDataProvider } from '../services'
-import type { Astronaut, DataSource, DataSourceKind, MetricDefinition, MissionPhase } from '../types'
+import { describeImportFailure, type ImportFailureDescription } from '../services/importErrors'
+import type {
+  Astronaut,
+  DataSource,
+  DataSourceKind,
+  ImportResult as ImportResultData,
+  MetricDefinition,
+  MissionPhase,
+} from '../types'
 import {
   buildImportRequest,
+  createSubmissionLock,
   mapObservations,
   parseCsv,
   parseJson,
+  reconcileRejectedRows,
   validateImportRows,
   type ImportDraftField,
   type ImportDraftRow,
   type ImportParseError,
+  type ImportRowError,
   type ParsedImportRow,
 } from '../utils/import'
 
@@ -59,6 +71,20 @@ type ContextState =
   | { status: 'ready'; data: ImportContext }
 
 type PreviewState = 'idle' | 'loading' | 'ready'
+
+interface SubmissionSuccess {
+  result: ImportResultData
+  operation: 'bulk' | 'single'
+  simulated: boolean
+  historyTotal: number | null
+  refreshError: string | null
+}
+
+type SubmissionState =
+  | { status: 'idle' }
+  | { status: 'submitting'; operation: 'bulk' | 'single' }
+  | ({ status: 'success' } & SubmissionSuccess)
+  | { status: 'error'; operation: 'bulk' | 'single'; failure: ImportFailureDescription }
 
 interface FormState {
   provider: string
@@ -144,9 +170,12 @@ export function ImportPage() {
   const [previewState, setPreviewState] = useState<PreviewState>('idle')
   const [draftRows, setDraftRows] = useState<ImportDraftRow[]>([])
   const [parseErrors, setParseErrors] = useState<ImportParseError[]>([])
+  const [backendRowErrors, setBackendRowErrors] = useState<ImportRowError[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
   const [notice, setNotice] = useState('')
+  const [submissionState, setSubmissionState] = useState<SubmissionState>({ status: 'idle' })
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const submissionLockRef = useRef(createSubmissionLock())
 
   useEffect(() => {
     let current = true
@@ -210,7 +239,9 @@ export function ImportPage() {
     setPreviewState('idle')
     setDraftRows([])
     setParseErrors([])
+    setBackendRowErrors([])
     setErrors({})
+    setSubmissionState({ status: 'idle' })
     setNotice('Importación cancelada. No se registraron ni enviaron datos.')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }, [contextState])
@@ -219,9 +250,11 @@ export function ImportPage() {
     setSourceType(nextSource)
     setErrors({})
     setNotice('')
+    setSubmissionState({ status: 'idle' })
     setFile(null)
     setDraftRows([])
     setParseErrors([])
+    setBackendRowErrors([])
     if (fileInputRef.current) fileInputRef.current.value = ''
 
     if (nextSource === 'synthetic') {
@@ -251,6 +284,9 @@ export function ImportPage() {
     const requiredExtension = extensionFor(sourceType)
     if (!candidate.name.toLowerCase().endsWith(requiredExtension)) {
       setFile(null)
+      setDraftRows([])
+      setParseErrors([])
+      setBackendRowErrors([])
       setPreviewState('idle')
       setErrors((previous) => ({
         ...previous,
@@ -261,6 +297,9 @@ export function ImportPage() {
 
     if (candidate.size === 0) {
       setFile(null)
+      setDraftRows([])
+      setParseErrors([])
+      setBackendRowErrors([])
       setPreviewState('idle')
       setErrors((previous) => ({ ...previous, file: 'El archivo está vacío.' }))
       return
@@ -273,6 +312,8 @@ export function ImportPage() {
       const content = await candidate.text()
       const parsed = sourceType === 'csv' ? parseCsv(content) : parseJson(content)
       setParseErrors(parsed.errors)
+      setBackendRowErrors([])
+      setSubmissionState({ status: 'idle' })
       setDraftRows(mapObservations(parsed.rows, {
         phase: form.phase,
         quality: 'unknown',
@@ -283,6 +324,7 @@ export function ImportPage() {
       setFile(null)
       setDraftRows([])
       setParseErrors([])
+      setBackendRowErrors([])
       setPreviewState('idle')
       setErrors((previous) => ({ ...previous, file: 'No fue posible leer el archivo local.' }))
     }
@@ -314,7 +356,12 @@ export function ImportPage() {
 
   const advance = () => {
     if (currentStep === 1 && !validateSelection()) return
-    if (currentStep === 3 && (parseErrors.length > 0 || validation.errors.length > 0 || draftRows.length === 0)) {
+    if (currentStep === 3 && (
+      parseErrors.length > 0
+      || validation.errors.length > 0
+      || backendRowErrors.length > 0
+      || draftRows.length === 0
+    )) {
       setNotice('Corrige los errores indicados antes de confirmar el JSON canónico.')
       return
     }
@@ -324,11 +371,76 @@ export function ImportPage() {
 
   const goBack = () => {
     setNotice('')
+    setSubmissionState({ status: 'idle' })
     setCurrentStep((step) => Math.max(1, step - 1))
   }
 
   const updateDraftRow = (rowNumber: number, field: ImportDraftField, value: string) => {
+    setSubmissionState({ status: 'idle' })
+    setBackendRowErrors((errors) => errors.filter((error) => error.row !== rowNumber))
     setDraftRows((rows) => rows.map((row) => row.row === rowNumber ? { ...row, [field]: value } : row))
+  }
+
+  const prepareRejectedRows = (result: ImportResultData) => {
+    const rejected = reconcileRejectedRows(draftRows, result)
+    setDraftRows(rejected.rows)
+    setBackendRowErrors(rejected.errors)
+    setSubmissionState({ status: 'idle' })
+    setCurrentStep(2)
+  }
+
+  const submitImport = async (operation: 'bulk' | 'single') => {
+    const request = requestResult.request
+    if (!request || submissionLockRef.current.active) return
+    if (operation === 'single' && request.observations.length !== 1) return
+
+    setNotice('')
+    setSubmissionState({ status: 'submitting', operation })
+    const provider = getDataProvider()
+
+    try {
+      const execution = await submissionLockRef.current.run<SubmissionSuccess>(async () => {
+        let result: ImportResultData
+        if (operation === 'single') {
+          const observation = await provider.createShipObservation({
+            astronaut_id: request.astronaut_id,
+            source: request.source,
+            observation: request.observations[0],
+          })
+          result = {
+            accepted: 1,
+            rejected: 0,
+            observation_ids: [observation.id],
+            errors: [],
+          }
+        } else {
+          result = await provider.importObservations(request)
+        }
+
+        let historyTotal: number | null = null
+        let refreshError: string | null = null
+        try {
+          const history = await provider.getShipObservations({ astronaut_id: request.astronaut_id })
+          historyTotal = history.total
+        } catch (error) {
+          refreshError = error instanceof Error ? error.message : 'Error desconocido al consultar el historial.'
+        }
+
+        return {
+          result,
+          operation,
+          simulated: provider.metadata.mode === 'mock',
+          historyTotal,
+          refreshError,
+        }
+      })
+
+      if (execution.started && execution.value) {
+        setSubmissionState({ status: 'success', ...execution.value })
+      }
+    } catch (error) {
+      setSubmissionState({ status: 'error', operation, failure: describeImportFailure(error) })
+    }
   }
 
   if (contextState.status === 'loading') {
@@ -357,7 +469,8 @@ export function ImportPage() {
   }
 
   const isSynthetic = sourceType === 'synthetic'
-  const localIssueCount = parseErrors.length + validation.errors.length + (draftRows.length === 0 ? 1 : 0)
+  const isSubmitting = submissionState.status === 'submitting'
+  const localIssueCount = parseErrors.length + validation.errors.length + backendRowErrors.length + (draftRows.length === 0 ? 1 : 0)
 
   return (
     <div className="space-y-6 pb-24 sm:pb-6">
@@ -542,7 +655,7 @@ export function ImportPage() {
             <EditableImportTable
               rows={draftRows}
               metrics={contextState.data.metrics}
-              errors={validation.errors}
+              errors={[...validation.errors, ...backendRowErrors]}
               onChange={updateDraftRow}
             />
           ) : (
@@ -577,7 +690,7 @@ export function ImportPage() {
             <h2 id="validation-heading" className="text-lg font-semibold text-ink">3. Validación local</h2>
             <p className="mt-1 text-sm leading-6 text-muted">Esta etapa aún no envía datos al backend.</p>
           </div>
-          {parseErrors.length === 0 && validation.errors.length === 0 && draftRows.length > 0 ? (
+          {parseErrors.length === 0 && validation.errors.length === 0 && backendRowErrors.length === 0 && draftRows.length > 0 ? (
             <div className="rounded-card border border-coverage/30 bg-coverage/5 p-5">
               <div className="flex items-start gap-3">
                 <CheckCircle2 aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-coverage" />
@@ -603,11 +716,14 @@ export function ImportPage() {
                 {validation.errors.map((error, index) => (
                   <li key={`validation-${error.row}-${error.code}-${index}`}><span className="font-semibold text-nasa-red">Fila {error.row} · {error.field}:</span> {error.detail}</li>
                 ))}
+                {backendRowErrors.map((error, index) => (
+                  <li key={`backend-${error.row}-${error.code}-${index}`}><span className="font-semibold text-nasa-red">Fila {error.row} · backend:</span> {error.detail}</li>
+                ))}
                 {draftRows.length === 0 && (
                   <li><span className="font-semibold text-nasa-red">Archivo:</span> No hay filas de observación disponibles para confirmar.</li>
                 )}
               </ul>
-              {validation.errors.length > 0 && (
+              {(validation.errors.length > 0 || backendRowErrors.length > 0) && (
                 <SecondaryButton type="button" onClick={() => setCurrentStep(2)} className="mt-4">
                   Corregir filas
                 </SecondaryButton>
@@ -626,49 +742,111 @@ export function ImportPage() {
         <section className="space-y-5 rounded-card border border-line bg-card p-5 shadow-card lg:p-6" aria-labelledby="confirmation-heading">
           <div>
             <h2 id="confirmation-heading" className="text-lg font-semibold text-ink">4. Confirma la preparación</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">Revisa el origen antes de habilitar el registro en FE-18.</p>
+            <p className="mt-1 text-sm leading-6 text-muted">Revisa el origen, registra una sola vez y conserva el resultado devuelto por el provider.</p>
           </div>
-          {isSynthetic && (
-            <div className="flex items-start gap-3 rounded-card border border-notice/40 bg-notice/10 p-5">
-              <FlaskConical aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-notice" />
-              <div>
-                <p className="font-semibold text-ink">ESCENARIO SINTÉTICO · SCENARIO-001</p>
-                <p className="mt-1 text-sm leading-6 text-muted">{draftRows.length} registros ficticios de SilverPulse demo para {form.astronautId}. No son datos médicos reales.</p>
+          {submissionState.status === 'success' ? (
+            <ImportResult
+              result={submissionState.result}
+              simulated={submissionState.simulated}
+              operation={submissionState.operation}
+              historyTotal={submissionState.historyTotal}
+              refreshError={submissionState.refreshError}
+              onCorrectRows={() => prepareRejectedRows(submissionState.result)}
+            />
+          ) : (
+            <>
+              {isSynthetic && (
+                <div className="flex items-start gap-3 rounded-card border border-notice/40 bg-notice/10 p-5">
+                  <FlaskConical aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-notice" />
+                  <div>
+                    <p className="font-semibold text-ink">ESCENARIO SINTÉTICO · SCENARIO-001</p>
+                    <p className="mt-1 text-sm leading-6 text-muted">{draftRows.length} registros ficticios de SilverPulse demo para {form.astronautId}. No son datos médicos reales.</p>
+                  </div>
+                </div>
+              )}
+              {!isSynthetic && (
+                <div className="rounded-card border border-line bg-canvas p-5">
+                  <p className="text-sm font-semibold text-ink">Archivo local · {file?.name}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">Proveedor {form.provider}; fuente {form.sourceId}. El archivo fue convertido localmente a JSON y todavía no fue enviado.</p>
+                </div>
+              )}
+              {requestResult.request && (
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-ink">ImportRequest listo para POST /ship/observations/import</h3>
+                    <span className="rounded-full bg-coverage/10 px-3 py-1 text-xs font-semibold text-coverage">application/json</span>
+                  </div>
+                  <pre className="mt-3 max-h-96 overflow-auto rounded-card bg-deep-space p-4 text-xs leading-5 text-slate-100" tabIndex={0}>{JSON.stringify(requestResult.request, null, 2)}</pre>
+                </div>
+              )}
+
+              {submissionState.status === 'error' && (
+                <div role="alert" className="rounded-card border border-nasa-red/25 bg-nasa-red/5 p-5">
+                  <div className="flex items-start gap-3">
+                    <TriangleAlert aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-nasa-red" />
+                    <div>
+                      <h3 className="font-semibold text-ink">
+                        {submissionState.failure.status ? `HTTP ${submissionState.failure.status} · ` : ''}{submissionState.failure.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-muted">{submissionState.failure.message}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {submissionState.failure.canCorrectRows && (
+                      <SecondaryButton type="button" onClick={() => {
+                        setSubmissionState({ status: 'idle' })
+                        setCurrentStep(2)
+                      }}>
+                        Revisar y corregir filas
+                      </SecondaryButton>
+                    )}
+                    <SecondaryButton type="button" onClick={() => void submitImport(submissionState.operation)}>
+                      Reintentar
+                    </SecondaryButton>
+                  </div>
+                </div>
+              )}
+
+              <AlertNotice title="Envío contractual">
+                <p>La importación múltiple usa <span className="font-mono">POST /ship/observations/import</span>. Si hay una sola fila también puedes usar el registro individual de demo mediante <span className="font-mono">POST /ship/observations</span>.</p>
+              </AlertNotice>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <PrimaryButton
+                  type="button"
+                  isSubmitting={isSubmitting && submissionState.operation === 'bulk'}
+                  disabled={!requestResult.request || isSubmitting}
+                  onClick={() => void submitImport('bulk')}
+                  className="w-full sm:w-auto"
+                >
+                  {isSubmitting && submissionState.operation === 'bulk'
+                    ? 'Registrando…'
+                    : `Registrar ${draftRows.length} ${draftRows.length === 1 ? 'observación' : 'observaciones'}`}
+                </PrimaryButton>
+                {requestResult.request?.observations.length === 1 && (
+                  <SecondaryButton
+                    type="button"
+                    isSubmitting={isSubmitting && submissionState.operation === 'single'}
+                    disabled={isSubmitting}
+                    onClick={() => void submitImport('single')}
+                    className="w-full sm:w-auto"
+                  >
+                    {isSubmitting && submissionState.operation === 'single' ? 'Registrando…' : 'Registrar observación individual'}
+                  </SecondaryButton>
+                )}
               </div>
-            </div>
+            </>
           )}
-          {!isSynthetic && (
-            <div className="rounded-card border border-line bg-canvas p-5">
-              <p className="text-sm font-semibold text-ink">Archivo local · {file?.name}</p>
-              <p className="mt-1 text-sm leading-6 text-muted">Proveedor {form.provider}; fuente {form.sourceId}. El archivo fue convertido localmente a JSON y todavía no fue enviado.</p>
-            </div>
-          )}
-          {requestResult.request && (
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-ink">ImportRequest listo para POST /ship/observations/import</h3>
-                <span className="rounded-full bg-coverage/10 px-3 py-1 text-xs font-semibold text-coverage">application/json</span>
-              </div>
-              <pre className="mt-3 max-h-96 overflow-auto rounded-card bg-deep-space p-4 text-xs leading-5 text-slate-100" tabIndex={0}>{JSON.stringify(requestResult.request, null, 2)}</pre>
-            </div>
-          )}
-          <AlertNotice title="Publicación todavía deshabilitada">
-            <p>FE-17 termina con un JSON canónico revisable. FE-18 conectará el POST, interpretará aceptados/rechazados y protegerá contra doble clic.</p>
-          </AlertNotice>
-          <PrimaryButton type="button" disabled className="w-full sm:w-auto">
-            Validar y registrar
-          </PrimaryButton>
         </section>
       )}
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card/95 p-3 shadow-[0_-8px_24px_rgb(8_24_46/8%)] backdrop-blur sm:static sm:flex sm:items-center sm:justify-between sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
-        <SecondaryButton type="button" onClick={resetFlow} className="hidden sm:inline-flex">
+        <SecondaryButton type="button" onClick={resetFlow} disabled={isSubmitting} className="hidden sm:inline-flex">
           <RotateCcw aria-hidden="true" className="size-4" />
           Cancelar
         </SecondaryButton>
         <div className="flex gap-2 sm:ml-auto">
           {currentStep > 1 && (
-            <SecondaryButton type="button" onClick={goBack} className="flex-1 sm:flex-none">
+            <SecondaryButton type="button" onClick={goBack} disabled={isSubmitting} className="flex-1 sm:flex-none">
               <ArrowLeft aria-hidden="true" className="size-4" />
               Atrás
             </SecondaryButton>
@@ -680,7 +858,7 @@ export function ImportPage() {
             </PrimaryButton>
           )}
           {currentStep === 4 && (
-            <SecondaryButton type="button" onClick={resetFlow} className="flex-1 sm:hidden">
+            <SecondaryButton type="button" onClick={resetFlow} disabled={isSubmitting} className="flex-1 sm:hidden">
               Cancelar sin publicar
             </SecondaryButton>
           )}
