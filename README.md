@@ -77,6 +77,24 @@ Los directorios todavía vacíos contienen un archivo `.gitkeep` para conservarl
 
 Los archivos `.env` locales están excluidos de Git para evitar publicar información sensible. Cuando el proyecto necesite configuración por variables de entorno, se deberá documentar un archivo `.env.example` sin credenciales reales.
 
+El modo de datos se selecciona explícitamente desde una copia local de
+`.env.example`:
+
+```bash
+VITE_DATA_PROVIDER=mock
+VITE_MOCK_SCENARIO=offline
+```
+
+Los escenarios disponibles son `offline`, `after-delivery` y `after-return`.
+Todos reproducen snapshots sintéticos del contrato v0.2.0; no guardan datos ni
+confirman ACK reales. `offline` es el valor predeterminado y mantiene vacía la
+bandeja médica de Tierra. El modo `http` queda reservado para el cliente de FE-11
+y el programa falla de forma explícita si se selecciona antes de implementarlo.
+
+Las páginas deben consumir la interfaz común de `src/services/dataProvider.ts`,
+obtenida mediante `getDataProvider()`, en lugar de importar fixtures directamente.
+Esto permite sustituir el proveedor mock por HTTP sin reescribir los componentes.
+
 ## Navegación demo y control de acceso
 
 React Router registra las vistas aprobadas de nave, Tierra, Mission Control y evidencia. La selección «Cambiar entorno demo» modifica únicamente el contexto visual y el menú mostrado; no autentica, autoriza ni protege información.

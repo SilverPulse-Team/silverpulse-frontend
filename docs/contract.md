@@ -14,8 +14,8 @@ generador OpenAPI. Se separan por dominio y `src/types/index.ts` ofrece un únic
 punto de importación. Cada cambio del YAML exige actualizar estos tipos y comprobar
 el proyecto con `npm run build`.
 
-TypeScript comprueba la forma estática de los datos, pero no valida en tiempo de
-ejecución restricciones como `format: date-time`, mínimos, máximos o
+TypeScript comprueba la forma estática de los fixtures de FE-10, pero no valida en
+tiempo de ejecución restricciones como `format: date-time`, mínimos, máximos o
 `exclusiveMinimum`. El cliente HTTP deberá validar la respuesta antes de afirmarla
 como un tipo del contrato.
 
