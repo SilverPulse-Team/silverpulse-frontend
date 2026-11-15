@@ -7,6 +7,7 @@ export type {
   DataProvider,
   DataProviderMetadata,
   DataProviderMode,
+  CountermeasureLogResult,
   HealthStatus,
   MedicalReviewResult,
   MockScenario,

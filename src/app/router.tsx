@@ -10,6 +10,7 @@ import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
 import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
+import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
 import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironment } from './demoEnvironment'
 
 const TrendsPage = lazy(() =>
@@ -58,7 +59,7 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
     return {
       title: 'SilverPulse',
       breadcrumb: breadcrumbFor(environment, route.label, route.section),
-      fitViewport: path !== '/astronaut/trends' && path !== '/astronaut/import',
+      fitViewport: path !== '/astronaut/trends' && path !== '/astronaut/import' && path !== '/astronaut/return',
     }
   }
 
@@ -153,7 +154,7 @@ function ShellRouter() {
         />
         <Route
           path="/astronaut/return"
-          element={<PlaceholderPage viewName="Preparación de retorno" description="Contendrá la cobertura de evidencia disponible y faltante sin calcular una aptitud clínica automática." />}
+          element={<ReturnReadinessPage />}
         />
         <Route
           path="/mission-control"

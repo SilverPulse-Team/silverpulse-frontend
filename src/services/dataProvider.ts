@@ -1,6 +1,7 @@
 import type {
   Astronaut,
   Baseline,
+  CountermeasureLogInput,
   CountermeasurePlan,
   ImportRequest,
   ImportResult,
@@ -44,6 +45,11 @@ export interface MedicalReviewResult {
   status: string
 }
 
+export interface CountermeasureLogResult {
+  id: string
+  status: string
+}
+
 export interface ResearchSource {
   id: string
   title: string
@@ -84,6 +90,7 @@ export interface DataProvider {
   getShipTrends(astronautId: string, metricCode: string): Promise<TrendSeries>
   getReturnReadiness(astronautId: string): Promise<Readiness>
   getCountermeasures(astronautId: string): Promise<CountermeasurePlan[]>
+  logCountermeasure(astronautId: string, input: CountermeasureLogInput): Promise<CountermeasureLogResult>
   importObservations(input: ImportRequest): Promise<ImportResult>
   createShipObservation(input: SingleObservationRequest): Promise<Observation>
   getShipObservations(filters?: ObservationFilters): Promise<ListObservations>

@@ -9,6 +9,8 @@ import type {
 } from '../services/dataProvider'
 import type {
   ImportRequest,
+  CountermeasureLogInput,
+  CountermeasurePlan,
   MedicalReviewInput,
   Observation,
   ReportGenerateInput,
@@ -123,7 +125,9 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
     acknowledgements: 'simulated',
   }
   const storedObservations: Observation[] = clone(listObservationsFixture.items)
+  const storedCountermeasures: CountermeasurePlan[] = clone(countermeasuresFixture)
   let nextObservationNumber = storedObservations.length + 1
+  let nextCountermeasureLogNumber = 1
 
   const storeObservation = (input: SingleObservationRequest): Observation => {
     const id = `OBS-MOCK-${String(nextObservationNumber).padStart(4, '0')}`
@@ -185,7 +189,26 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
 
     async getCountermeasures(astronautId) {
       assertFixtureId(astronautId, 'AST-001', 'astronauta')
-      return clone(countermeasuresFixture)
+      return clone(storedCountermeasures)
+    },
+
+    async logCountermeasure(astronautId, input: CountermeasureLogInput) {
+      assertFixtureId(astronautId, 'AST-001', 'astronauta')
+      const plan = storedCountermeasures.find((item) => item.id === input.plan_id)
+      if (!plan) throw new MockFixtureNotFoundError(`plan de contramedida "${input.plan_id}"`)
+      if (
+        !Number.isFinite(input.duration_min) ||
+        input.duration_min <= 0 ||
+        Number.isNaN(new Date(input.completed_at_utc).getTime()) ||
+        typeof input.self_reported !== 'boolean'
+      ) {
+        throw new MockFixtureMismatchError('registro de cumplimiento')
+      }
+
+      plan.logs_completed += 1
+      const id = `CMLOG-MOCK-${String(nextCountermeasureLogNumber).padStart(4, '0')}`
+      nextCountermeasureLogNumber += 1
+      return { id, status: 'recorded' }
     },
 
     async importObservations(input: ImportRequest) {

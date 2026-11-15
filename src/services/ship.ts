@@ -1,5 +1,6 @@
 import type {
   ImportRequest,
+  CountermeasureLogInput,
   ReportGenerateInput,
   SingleObservationRequest,
 } from '../types'
@@ -9,6 +10,7 @@ import {
   parseAstronauts,
   parseBaselines,
   parseCountermeasures,
+  parseCountermeasureLogResult,
   parseImportResult,
   parseListObservations,
   parseListReports,
@@ -45,6 +47,13 @@ export function createShipService(client: ApiClient) {
       client.get(
         `/ship/astronauts/${encodeURIComponent(astronautId)}/countermeasures`,
         parseCountermeasures,
+      ),
+
+    logCountermeasure: (astronautId: string, input: CountermeasureLogInput) =>
+      client.post(
+        `/ship/astronauts/${encodeURIComponent(astronautId)}/countermeasures/logs`,
+        input,
+        parseCountermeasureLogResult,
       ),
 
     importObservations: (input: ImportRequest) =>

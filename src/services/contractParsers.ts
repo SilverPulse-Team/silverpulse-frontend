@@ -16,6 +16,7 @@ import type {
 } from '../types'
 import type {
   HealthStatus,
+  CountermeasureLogResult,
   MedicalReviewResult,
   ResearchSource,
   ShipInbox,
@@ -355,6 +356,10 @@ export const parseBaselines = parser<Baseline[]>(arrayOf(baseline))
 export const parseTrendSeries = parser<TrendSeries>(trendSeries)
 export const parseReadiness = parser<Readiness>(readiness)
 export const parseCountermeasures = parser<CountermeasurePlan[]>(arrayOf(countermeasure))
+export const parseCountermeasureLogResult = parser<CountermeasureLogResult>(objectOf({
+  id: required(stringValue),
+  status: required(stringValue),
+}))
 export const parseImportResult = parser<ImportResult>(importResult)
 export const parseObservation = parser<Observation>(observation)
 export const parseListObservations = parser<ListObservations>(paginated(observation))
