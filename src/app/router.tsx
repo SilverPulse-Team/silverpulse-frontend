@@ -7,8 +7,10 @@ import { LoadingSkeleton } from '../components/ui'
 import { AstronautOverviewPage } from '../pages/AstronautOverviewPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
-import { ReportPlaceholderPage } from '../pages/ReportPlaceholderPage'
 import { ShipReportDetailPage } from '../pages/ShipReportDetailPage'
+import { MissionControlPage } from '../pages/MissionControlPage'
+import { EarthReportsPage } from '../pages/EarthReportsPage'
+import { EarthReportReviewPage } from '../pages/EarthReportReviewPage'
 import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
 import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
@@ -157,20 +159,9 @@ function ShellRouter() {
           path="/astronaut/return"
           element={<ReturnReadinessPage />}
         />
-        <Route
-          path="/mission-control"
-          element={
-            <PlaceholderPage
-              viewName={environment === 'ship' ? 'Comunicaciones' : 'SilverPulse Sync · Mission Control'}
-              description={environment === 'ship' ? 'Contendrá mensajes y estados de sincronización entre la nave y Tierra.' : 'Contendrá el simulador local de enlace diferido; no representa una red espacial real.'}
-            />
-          }
-        />
-        <Route
-          path="/medical"
-          element={<PlaceholderPage viewName="Bandeja médica" description="Contendrá únicamente informes entregados y guardados en Tierra, nunca datos locales pendientes en nave." />}
-        />
-        <Route path="/medical/reports/:id" element={<ReportPlaceholderPage context="earth" />} />
+        <Route path="/mission-control" element={<MissionControlPage />} />
+        <Route path="/medical" element={<EarthReportsPage />} />
+        <Route path="/medical/reports/:id" element={<EarthReportReviewPage />} />
         <Route path="/astronaut/reports/:id" element={<ShipReportDetailPage />} />
         <Route
           path="/evidence"

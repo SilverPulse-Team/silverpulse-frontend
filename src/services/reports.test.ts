@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  medicalReviewRequestFixture,
+  medicalReviewResultFixture,
   reportGenerateRequestFixture,
   shipReportFixture,
   shipReportsFixture,
@@ -40,6 +42,21 @@ describe('servicio HTTP de informes de nave', () => {
     expect(reports.items[0].report_id).toBe('RPT-0001')
     expect(String(fetchImplementation.mock.calls[0][0])).toBe('http://localhost:8000/api/v1/ship/reports')
   })
+
+  it('envía la revisión de Tierra con el body contractual y conserva el estado de respuesta', async () => {
+    const fetchImplementation = vi.fn<typeof fetch>(async () => new Response(
+      JSON.stringify(medicalReviewResultFixture),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    ))
+    const provider = createHttpDataProvider({ baseUrl: 'http://localhost:8000/api/v1', fetchImplementation })
+
+    const result = await provider.reviewEarthReport('RPT-0001', medicalReviewRequestFixture)
+
+    expect(result).toEqual(medicalReviewResultFixture)
+    expect(String(fetchImplementation.mock.calls[0][0])).toBe('http://localhost:8000/api/v1/earth/reports/RPT-0001/review')
+    expect(fetchImplementation.mock.calls[0][1]?.method).toBe('POST')
+    expect(JSON.parse(String(fetchImplementation.mock.calls[0][1]?.body))).toEqual(medicalReviewRequestFixture)
+  })
 })
 
 describe('provider mock del ciclo logístico del informe', () => {
@@ -63,6 +80,11 @@ describe('provider mock del ciclo logístico del informe', () => {
     expect((await offline.getEarthReports()).total).toBe(0)
     expect((await offline.getShipInbox()).items).toHaveLength(0)
     expect((await afterReturn.getShipInbox()).items[0].report_id).toBe('RPT-0001')
+    expect((await afterReturn.getEarthReports()).items[0].review_status).toBe('reviewed')
+    expect(await afterReturn.getEarthReport('RPT-0001')).toMatchObject({
+      communication: { status: 'delivered', delivered_at_utc: expect.any(String) },
+      review_status: 'reviewed',
+    })
   })
 
   it('rechaza una generación no canónica sin añadir un informe fantasma', async () => {

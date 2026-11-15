@@ -14,8 +14,10 @@ import type {
   Readiness,
   Report,
   ReportGenerateInput,
+  SimulatorConfigInput,
   SimulatorMetrics,
   SimulatorStatus,
+  SimulatorStepInput,
   SingleObservationRequest,
   TrendSeries,
 } from '../types'
@@ -103,6 +105,8 @@ export interface DataProvider {
   reviewEarthReport(reportId: string, input: MedicalReviewInput): Promise<MedicalReviewResult>
   getSimulatorStatus(): Promise<SimulatorStatus>
   getSimulatorMetrics(): Promise<SimulatorMetrics>
+  configureSimulator(input: SimulatorConfigInput): Promise<SimulatorStatus>
+  stepSimulator(input: SimulatorStepInput): Promise<SimulatorStatus>
   getResearchSources(): Promise<ResearchSource[]>
 }
 

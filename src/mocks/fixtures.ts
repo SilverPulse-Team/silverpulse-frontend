@@ -398,6 +398,13 @@ export const earthReportsAfterDeliveryFixture = {
   offset: 0,
 } satisfies ListReports
 
+export const earthReportsAfterReturnFixture = {
+  items: [{ ...earthDeliveredReportFixture, review_status: 'reviewed' }],
+  total: 1,
+  limit: 25,
+  offset: 0,
+} satisfies ListReports
+
 export const medicalReviewResultFixture = {
   review_id: 'REV-001',
   return_message_id: 'MSG-RETURN-001',
@@ -458,6 +465,7 @@ export const silverPulseFixturesV020 = {
   trends: trendsFixture,
   countermeasures: countermeasuresFixture,
   earthReportsAfterDelivery: earthReportsAfterDeliveryFixture,
+  earthReportsAfterReturn: earthReportsAfterReturnFixture,
   medicalReviewResult: medicalReviewResultFixture,
   shipInboxAfterReturn: shipInboxAfterReturnFixture,
   researchSources: researchSourcesFixture,

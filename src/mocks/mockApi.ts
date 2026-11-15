@@ -14,6 +14,9 @@ import type {
   MedicalReviewInput,
   Observation,
   ReportGenerateInput,
+  SimulatorConfigInput,
+  SimulatorStatus,
+  SimulatorStepInput,
   SingleObservationRequest,
 } from '../types'
 import {
@@ -21,6 +24,7 @@ import {
   baselinesFixture,
   countermeasuresFixture,
   earthReportsAfterDeliveryFixture,
+  earthReportsAfterReturnFixture,
   earthReportsBeforeDeliveryFixture,
   emptyShipInboxFixture,
   healthFixture,
@@ -65,6 +69,15 @@ export class MockFixtureMismatchError extends Error {
       `El modo mock solo reproduce la solicitud canónica v0.2.0 para ${operation}; no se ejecutó ni persistió la acción.`,
     )
     this.name = 'MockFixtureMismatchError'
+  }
+}
+
+export class MockOperationUnavailableError extends Error {
+  readonly status = 501
+
+  constructor(operation: string) {
+    super(`El provider mock no ejecuta ${operation}; se conservan el estado y las métricas actuales.`)
+    this.name = 'MockOperationUnavailableError'
   }
 }
 
@@ -130,6 +143,7 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
   }
   const storedObservations: Observation[] = clone(listObservationsFixture.items)
   const storedCountermeasures: CountermeasurePlan[] = clone(countermeasuresFixture)
+  let simulatorStatus: SimulatorStatus = clone(simulatorStatusFixture)
   let nextObservationNumber = storedObservations.length + 1
   let nextCountermeasureLogNumber = 1
 
@@ -262,15 +276,18 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
 
     async getEarthReports(options?: PaginationOptions) {
       assertDefaultPagination(options)
-      return clone(
-        scenario === 'offline' ? earthReportsBeforeDeliveryFixture : earthReportsAfterDeliveryFixture,
-      )
+      if (scenario === 'offline') return clone(earthReportsBeforeDeliveryFixture)
+      if (scenario === 'after-return') return clone(earthReportsAfterReturnFixture)
+      return clone(earthReportsAfterDeliveryFixture)
     },
 
     async getEarthReport(reportId) {
       assertFixtureId(reportId, 'RPT-0001', 'informe de Tierra')
       if (scenario === 'offline') {
         throw new MockFixtureNotFoundError(`informe de Tierra "${reportId}" antes de entrega`)
+      }
+      if (scenario === 'after-return') {
+        return clone(earthReportsAfterReturnFixture.items[0])
       }
       return clone(earthReportsAfterDeliveryFixture.items[0])
     },
@@ -288,11 +305,38 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
     },
 
     async getSimulatorStatus() {
-      return clone(simulatorStatusFixture)
+      return clone(simulatorStatus)
     },
 
     async getSimulatorMetrics() {
       return clone(simulatorMetricsFixture)
+    },
+
+    async configureSimulator(input: SimulatorConfigInput) {
+      if (
+        !Number.isInteger(input.one_way_latency_simulated_s) ||
+        input.one_way_latency_simulated_s < 0 ||
+        !Number.isFinite(input.time_acceleration) ||
+        input.time_acceleration <= 0 ||
+        (input.drop_ack !== undefined && typeof input.drop_ack !== 'boolean')
+      ) {
+        throw new MockFixtureMismatchError('configuración del simulador fuera de contrato')
+      }
+
+      simulatorStatus = {
+        ...simulatorStatus,
+        mode: input.mode,
+        one_way_latency_simulated_s: input.one_way_latency_simulated_s,
+        time_acceleration: input.time_acceleration,
+      }
+      return clone(simulatorStatus)
+    },
+
+    async stepSimulator(input: SimulatorStepInput) {
+      if (!Number.isInteger(input.simulated_seconds) || input.simulated_seconds < 1 || input.simulated_seconds > 86400) {
+        throw new MockFixtureMismatchError('avance del simulador fuera de contrato')
+      }
+      throw new MockOperationUnavailableError('el avance del reloj y la entrega de mensajes')
     },
 
     async getResearchSources() {

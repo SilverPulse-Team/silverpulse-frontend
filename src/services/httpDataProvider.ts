@@ -43,6 +43,8 @@ export function createHttpDataProvider(options: ApiClientOptions = {}): DataProv
     reviewEarthReport: earth.reviewReport,
     getSimulatorStatus: simulator.getStatus,
     getSimulatorMetrics: simulator.getMetrics,
+    configureSimulator: simulator.configure,
+    stepSimulator: simulator.step,
     getResearchSources: research.getSources,
   }
 }
