@@ -38,6 +38,124 @@ textarea {
   line-height: 1.25rem;
 }
 
+.construction-stage {
+  position: relative;
+  display: grid;
+  width: min(15rem, 34dvh, 70vw);
+  aspect-ratio: 1;
+  place-items: center;
+  justify-self: center;
+}
+
+.construction-space {
+  position: relative;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgb(38 135 201 / 20%) 0, transparent 24%),
+    radial-gradient(circle at 82% 78%, rgb(11 61 145 / 30%) 0, transparent 28%),
+    linear-gradient(145deg, var(--sp-color-deep-space), var(--sp-color-midnight-surface));
+}
+
+.construction-space::before,
+.construction-space::after {
+  position: absolute;
+  inset: -20%;
+  content: "";
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgb(255 255 255 / 70%) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgb(38 135 201 / 70%) 0 1px, transparent 1.5px);
+  background-position: 0 0, 2rem 3rem;
+  background-size: 5rem 5rem, 7rem 7rem;
+  opacity: 0.35;
+  animation: construction-stars 18s linear infinite;
+}
+
+.construction-space::after {
+  background-size: 9rem 9rem, 12rem 12rem;
+  opacity: 0.2;
+  animation-duration: 28s;
+  animation-direction: reverse;
+}
+
+.construction-stage::before,
+.construction-stage::after {
+  position: absolute;
+  content: "";
+  border: 1px solid color-mix(in srgb, var(--sp-color-data) 22%, transparent);
+  border-radius: 9999px;
+}
+
+.construction-stage::before {
+  inset: 12%;
+}
+
+.construction-stage::after {
+  inset: 25%;
+}
+
+.construction-icon {
+  z-index: 1;
+  display: grid;
+  width: 6rem;
+  height: 6rem;
+  place-items: center;
+  color: var(--sp-color-card);
+  background: var(--sp-color-nasa-blue);
+  border-radius: var(--sp-radius-card);
+  box-shadow: var(--sp-shadow-card);
+  animation: construction-float 2.8s ease-in-out infinite;
+}
+
+.construction-orbit {
+  position: absolute;
+  inset: 5%;
+  animation: construction-rotate 8s linear infinite;
+}
+
+.construction-orbit-dot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0.875rem;
+  height: 0.875rem;
+  background: var(--sp-color-nasa-red);
+  border: 3px solid var(--sp-color-card);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgb(8 24 46 / 18%);
+  transform: translateX(-50%);
+}
+
+.construction-satellite {
+  position: absolute;
+  right: 12%;
+  bottom: 18%;
+  color: var(--sp-color-data);
+  animation: construction-float 2.8s 0.7s ease-in-out infinite;
+}
+
+@keyframes construction-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes construction-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes construction-stars {
+  to {
+    transform: translate3d(3rem, 2rem, 0);
+  }
+}
+
 :focus-visible {
   outline: 3px solid var(--sp-color-data);
   outline-offset: 3px;
@@ -56,5 +174,13 @@ textarea {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .construction-icon,
+  .construction-orbit,
+  .construction-satellite,
+  .construction-space::before,
+  .construction-space::after {
+    animation: none !important;
   }
 }

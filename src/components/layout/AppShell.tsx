@@ -9,6 +9,7 @@ interface AppShellProps {
   title: string
   breadcrumb: string[]
   children: ReactNode
+  fitViewport?: boolean
   onChangeEnvironment?: () => void
 }
 
@@ -18,6 +19,7 @@ export function AppShell({
   title,
   breadcrumb,
   children,
+  fitViewport = false,
   onChangeEnvironment,
 }: AppShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -56,7 +58,7 @@ export function AppShell({
   }, [isMenuOpen])
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
+    <div className={`${fitViewport ? 'h-dvh overflow-hidden' : 'min-h-screen'} bg-canvas text-ink`}>
       <aside
         className={`fixed inset-y-0 left-0 z-30 hidden transition-[width] duration-200 md:block ${
           isSidebarExpanded ? 'w-[272px]' : 'w-20'
@@ -101,7 +103,7 @@ export function AppShell({
       )}
 
       <div
-        className={`min-w-0 transition-[padding] duration-200 ${
+        className={`min-w-0 transition-[padding] duration-200 ${fitViewport ? 'h-dvh overflow-hidden' : ''} ${
           isSidebarExpanded ? 'md:pl-[272px]' : 'md:pl-20'
         }`}
       >
@@ -112,7 +114,11 @@ export function AppShell({
           onOpenMenu={() => setIsMenuOpen(true)}
           menuButtonRef={menuButtonRef}
         />
-        <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main
+          className={`mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 ${
+            fitViewport ? 'h-[calc(100dvh-5rem)] overflow-hidden py-4' : 'py-6 lg:py-8'
+          }`}
+        >
           {children}
         </main>
       </div>
