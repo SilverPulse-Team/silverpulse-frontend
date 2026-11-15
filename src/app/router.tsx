@@ -86,6 +86,7 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
 export function AppRouter() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/*" element={<ShellRouter />} />
     </Routes>
@@ -118,7 +119,6 @@ function ShellRouter() {
       onChangeEnvironment={changeEnvironment}
     >
       <Routes>
-        <Route path="/" element={<Navigate to="/astronaut" replace />} />
         <Route
           path="/astronaut"
           element={
