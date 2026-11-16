@@ -14,6 +14,7 @@ import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
 import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
 import { AnalysisPage } from '../pages/AnalysisPage'
+import { resolveShipAssistantEnabled } from '../services'
 import {
   endDemoSession,
   environmentHome,
@@ -97,7 +98,10 @@ function ShellRouter() {
           path="/astronaut/import"
           element={<ImportPage />}
         />
-        <Route path="/astronaut/analysis" element={<AnalysisPage />} />
+        <Route
+          path="/astronaut/analysis"
+          element={resolveShipAssistantEnabled() ? <AnalysisPage /> : <Navigate to="/astronaut" replace />}
+        />
         <Route
           path="/astronaut/trends"
           element={

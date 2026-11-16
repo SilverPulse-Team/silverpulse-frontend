@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMockDataProvider } from '../../mocks/mockApi'
 import { earthReportsAfterDeliveryFixture } from '../../mocks/fixtures'
 import { resetDataProvider, setDataProvider, type DataProvider } from '../../services'
@@ -19,9 +19,21 @@ const readySession: AnalysisSession = {
   post_analysis_questions: [], limitations: ['Demo'],
 }
 
-afterEach(() => { cleanup(); resetDataProvider() })
+beforeEach(() => { vi.stubEnv('VITE_ENABLE_SHIP_ASSISTANT', 'true') })
+afterEach(() => { cleanup(); resetDataProvider(); vi.unstubAllEnvs() })
 
 describe('AssistantWidget', () => {
+  it('oculta el asistente de a bordo por defecto y mantiene el asistente de Tierra', () => {
+    vi.stubEnv('VITE_ENABLE_SHIP_ASSISTANT', '')
+    setDataProvider(createMockDataProvider())
+    const shipView = render(<MemoryRouter initialEntries={['/astronaut']}><AssistantWidget environment="ship" /></MemoryRouter>)
+    expect(screen.queryByRole('button', { name: 'Abrir asistente de a bordo' })).toBeNull()
+    shipView.unmount()
+
+    render(<MemoryRouter initialEntries={['/medical']}><AssistantWidget environment="earth" /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: 'Abrir asistente de revisión' })).toBeTruthy()
+  })
+
   it('permanece disponible en todas las vistas del entorno Nave y Tierra', () => {
     setDataProvider(createMockDataProvider())
     const shipView = render(<MemoryRouter initialEntries={['/mission-control']}><AssistantWidget environment="ship" /></MemoryRouter>)

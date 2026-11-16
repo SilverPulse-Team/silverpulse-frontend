@@ -1,4 +1,4 @@
-import type { MissionPhase, ObservationInput, ObservationQuality } from '../types'
+import type { DataSource, MissionPhase, ObservationInput, ObservationQuality } from '../types'
 
 export interface ImportParseError {
   row: number
@@ -15,6 +15,8 @@ export interface ParsedImportData {
   columns: string[]
   rows: ParsedImportRow[]
   errors: ImportParseError[]
+  /** Metadatos de procedencia de un ImportRequest canónico; ausente en arreglos simples y CSV. */
+  source?: DataSource
 }
 
 export interface ImportDraftRow {

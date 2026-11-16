@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useLocation } from 'react-router'
+import { resolveShipAssistantEnabled } from '../../services'
 import type { ShellEnvironment } from '../layout/navigation'
 import { AssistantLauncher } from './AssistantLauncher'
 import { EarthAssistant } from './EarthAssistant'
@@ -13,6 +14,7 @@ export function AssistantWidget({ environment }: { environment: ShellEnvironment
   const clearsStickyActions = location.pathname === '/astronaut/import'
 
   if (!variant) return null
+  if (variant === 'ship' && !resolveShipAssistantEnabled()) return null
   const close = () => { setOpen(false); requestAnimationFrame(() => launcherRef.current?.focus()) }
   return (
     <>

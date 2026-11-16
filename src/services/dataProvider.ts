@@ -136,6 +136,14 @@ export function resolveDataProviderMode(value = import.meta.env.VITE_DATA_PROVID
   throw new Error(`VITE_DATA_PROVIDER debe ser "mock" o "http"; se recibió "${value}".`)
 }
 
+/**
+ * El asistente de a bordo requiere los endpoints /ship/analyses de la rama del asistente conversacional.
+ * El backend MVP no los expone, así que el asistente queda desactivado salvo `VITE_ENABLE_SHIP_ASSISTANT=true`.
+ */
+export function resolveShipAssistantEnabled(value = import.meta.env.VITE_ENABLE_SHIP_ASSISTANT): boolean {
+  return value === 'true'
+}
+
 export function resolveMockScenario(value = import.meta.env.VITE_MOCK_SCENARIO): MockScenario {
   if (value === undefined || value === '' || value === 'offline') {
     return 'offline'
