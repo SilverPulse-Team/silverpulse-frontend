@@ -1,5 +1,6 @@
 import { Activity, LogOut, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
 import { Link } from 'react-router'
+import { SilverPulseLogo } from '../brand/SilverPulseLogo'
 import { enabledNavigation, environmentConfig, type ShellEnvironment } from './navigation'
 
 interface SidebarProps {
@@ -165,12 +166,5 @@ function SatelliteEnvironmentIcon({ environment }: { environment: ShellEnvironme
 }
 
 function BrandMark() {
-  return (
-    <span
-      aria-hidden="true"
-      className="grid size-11 shrink-0 place-items-center rounded-full border border-data font-semibold text-data transition-colors hover:bg-data/10"
-    >
-      SP
-    </span>
-  )
+  return <SilverPulseLogo />
 }

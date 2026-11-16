@@ -211,7 +211,7 @@ export function MissionControlPage({ environment = 'mission-control' }: { enviro
         )}
       </section>
 
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+      <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
         {statusState.status === 'ready' ? (
           <SimulatorControls
             key={`${statusState.data.mode}-${statusState.data.one_way_latency_simulated_s}-${statusState.data.time_acceleration}`}
