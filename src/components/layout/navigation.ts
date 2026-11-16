@@ -1,9 +1,6 @@
 import {
-  Activity,
-  BrainCircuit,
   ChartNoAxesCombined,
   ClipboardCheck,
-  FileText,
   FlaskConical,
   House,
   Inbox,
@@ -49,10 +46,8 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     navigation: [
       { label: 'Resumen', href: '/astronaut', icon: House },
       { label: 'Importar datos', href: '/astronaut/import', icon: Upload },
-      { label: 'Análisis guiado', href: '/astronaut/analysis', icon: BrainCircuit },
       { label: 'Tendencias', href: '/astronaut/trends', icon: ChartNoAxesCombined },
       { label: 'Preparación de retorno', href: '/astronaut/return', icon: ClipboardCheck },
-      { label: 'Informes', href: '/astronaut#ship-reports', icon: FileText },
       { label: 'Comunicaciones', href: '/mission-control', icon: Radio },
       ...sharedNavigation,
     ],
@@ -72,7 +67,6 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     profile: 'Mission Control · DEMO',
     navigation: [
       { label: 'Control de enlace', href: '/mission-control', icon: Satellite },
-      { label: 'Resumen de nave', href: '/astronaut', icon: Activity },
       ...sharedNavigation,
     ],
   },

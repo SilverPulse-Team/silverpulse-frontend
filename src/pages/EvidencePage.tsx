@@ -1,3 +1,4 @@
+import { CheckCircle2, FlaskConical, ShieldCheck, Satellite } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { PageHeader } from '../components/layout/PageHeader'
 import { EvaluationResults, type EvaluationDisplayResult } from '../components/evidence/EvaluationResults'
@@ -22,7 +23,7 @@ const tabs: { id: EvidenceTab; label: string }[] = [
   { id: 'sources', label: 'Fuentes' },
   { id: 'methodology', label: 'Metodología' },
   { id: 'evaluation', label: 'Evaluación' },
-  { id: 'limitations', label: 'Limitaciones' },
+  { id: 'limitations', label: 'Alcance del demo' },
 ]
 
 const methodPanels = [
@@ -41,6 +42,11 @@ const methodPanels = [
     description:
       'Considera la calidad de datos, contexto, persistencia y abstención. Es una descripción del método, no una afirmación de eficacia clínica.',
   },
+]
+
+const evaluationFixtures = [
+  { id: 'analysis_abc', label: 'Comparar análisis A/B/C', description: 'Compara estrategias de análisis y abstención sobre el fixture reproducible incluido.' },
+  { id: 'link_drop', label: 'Probar enlace intermitente', description: 'Ejecuta el escenario reproducible de transporte con interrupciones.' },
 ]
 
 function isEndpointUnavailable(error: unknown) {
@@ -98,25 +104,47 @@ function MethodologyPanel() {
 }
 
 function LimitationsPanel() {
-  const limitations = [
-    'Las demostraciones pueden utilizar escenarios sintéticos o fixtures; no representan pacientes ni misiones reales.',
-    'No hay pruebas clínicas ni validación clínica de SilverPulse en esta interfaz.',
-    'El simulador es local y no demuestra infraestructura espacial real.',
-    'Las fuentes públicas contextualizan la investigación; no validan SilverPulse.',
-    'SilverPulse no afirma acceso a historias clínicas de NASA, afiliación ni aprobación de NASA.',
-    'El contrato de evaluación v0.2.0 no devuelve algoritmo, fecha, fuente/dataset ni limitaciones por corrida; esos datos no se inventan.',
-  ]
-
   return (
-    <section>
-      <h2 className="text-xl font-semibold text-ink">Alcance y limitaciones</h2>
-      <ul className="mt-4 space-y-3">
-        {limitations.map((limitation) => (
-          <li key={limitation} className="rounded-card border border-line bg-card p-4 text-sm leading-6 text-ink">
-            {limitation}
-          </li>
-        ))}
-      </ul>
+    <section className="space-y-5">
+      <div className="rounded-card border border-nasa-blue/25 bg-gradient-to-br from-nasa-blue/10 to-card p-5 sm:p-6">
+        <div className="flex items-start gap-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-nasa-blue text-white"><ShieldCheck aria-hidden="true" className="size-5" /></span>
+          <div>
+            <h2 className="text-xl font-semibold text-ink">¿Para qué sirve esta sección?</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+              Define qué puedes demostrar con seguridad durante la presentación y qué afirmaciones debes evitar. Protege la credibilidad del demo; no es una pantalla clínica.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <article className="rounded-card border border-data/30 bg-card p-5 shadow-card">
+          <CheckCircle2 aria-hidden="true" className="size-6 text-data" />
+          <h3 className="mt-3 font-semibold text-ink">Sí demuestra</h3>
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-muted">
+            <li>• Flujos reproducibles con datos sintéticos.</li>
+            <li>• Trazabilidad y abstención cuando faltan datos.</li>
+            <li>• Comunicación diferida mediante un simulador local.</li>
+          </ul>
+        </article>
+        <article className="rounded-card border border-notice/35 bg-card p-5 shadow-card">
+          <FlaskConical aria-hidden="true" className="size-6 text-notice" />
+          <h3 className="mt-3 font-semibold text-ink">No demuestra</h3>
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-muted">
+            <li>• Diagnóstico, tratamiento o validación clínica.</li>
+            <li>• Resultados de pacientes o misiones reales.</li>
+            <li>• Aprobación, afiliación o infraestructura de NASA.</li>
+          </ul>
+        </article>
+        <article className="rounded-card border border-line bg-card p-5 shadow-card">
+          <Satellite aria-hidden="true" className="size-6 text-nasa-blue" />
+          <h3 className="mt-3 font-semibold text-ink">Cómo presentarlo</h3>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            Di «prototipo demostrativo con datos sintéticos». Explica que las fuentes dan contexto y que las métricas de evaluación provienen del backend; no conviertas una corrida en evidencia clínica.
+          </p>
+        </article>
+      </div>
     </section>
   )
 }
@@ -414,14 +442,12 @@ export function EvidencePage() {
 
         {activeTab === 'evaluation' && (
           <div className="space-y-8">
-            <MethodologyPanel />
             <section className="space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-ink">Corridas reproducibles</h2>
+                  <h2 className="text-xl font-semibold text-ink">Evaluación reproducible</h2>
                   <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
-                    Se envía únicamente fixture_id a POST /evaluation/run. Los valores y N provienen de
-                    la API; el frontend no estima mejoras.
+                    Ejecuta un escenario controlado y consulta resultados medidos por el backend. La explicación de los métodos A/B/C permanece en la pestaña Metodología.
                   </p>
                 </div>
                 <SecondaryButton
@@ -436,23 +462,31 @@ export function EvidencePage() {
               </div>
 
               {provider.metadata.mode === 'http' ? (
-                <form onSubmit={handleRunEvaluation} className="flex flex-col gap-3 rounded-card border border-line bg-card p-4 sm:flex-row sm:items-end">
-                  <label className="min-w-0 flex-1 text-sm font-medium text-ink" htmlFor="evaluation-fixture-id">
-                    ID del fixture
-                    <input
-                      id="evaluation-fixture-id"
-                      name="fixture_id"
-                      value={fixtureId}
-                      onChange={(event) => setFixtureId(event.target.value)}
-                      required
-                      autoComplete="off"
-                      className="mt-1 min-h-11 w-full rounded-control border border-line bg-canvas px-3 text-ink"
-                      placeholder="Ingresa un fixture_id admitido por el backend"
-                    />
-                  </label>
-                  <PrimaryButton type="submit" disabled={isSubmitting || !fixtureId.trim()}>
-                    {isSubmitting ? 'Ejecutando…' : 'Ejecutar evaluación'}
-                  </PrimaryButton>
+                <form onSubmit={handleRunEvaluation} className="space-y-4 rounded-card border border-line bg-card p-4 sm:p-5">
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-ink">Elige un escenario reproducible</legend>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      {evaluationFixtures.map((fixture) => (
+                        <button
+                          key={fixture.id}
+                          type="button"
+                          aria-pressed={fixtureId === fixture.id}
+                          onClick={() => setFixtureId(fixture.id)}
+                          className={`min-h-24 rounded-card border p-4 text-left transition-colors ${fixtureId === fixture.id ? 'border-nasa-blue bg-nasa-blue/5 ring-2 ring-nasa-blue/20' : 'border-line hover:border-nasa-blue/50'}`}
+                        >
+                          <span className="block text-sm font-semibold text-ink">{fixture.label}</span>
+                          <span className="mt-1 block text-xs leading-5 text-muted">{fixture.description}</span>
+                          <span className="mt-2 block font-mono text-[11px] text-nasa-blue">{fixture.id}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+                    <p className="text-xs text-muted">La corrida se guarda en <code>evaluation.db</code> y luego aparece en resultados.</p>
+                    <PrimaryButton type="submit" disabled={isSubmitting || !fixtureId}>
+                      {isSubmitting ? 'Ejecutando…' : 'Ejecutar escenario'}
+                    </PrimaryButton>
+                  </div>
                 </form>
               ) : (
                 <EmptyState
@@ -484,8 +518,8 @@ export function EvidencePage() {
               )}
               {evaluationState.status === 'ready' && results.length === 0 && (
                 <EmptyState
-                  title="No ejecutada / Sin resultados"
-                  description="El backend no devolvió corridas. Ejecuta una evaluación cuando la API esté disponible; no se inventan métricas."
+                  title="Aún no hay corridas"
+                  description="Selecciona uno de los dos escenarios de arriba y ejecútalo. Los resultados y el tamaño de muestra vendrán del backend."
                 />
               )}
               {results.length > 0 && <EvaluationResults results={results} />}

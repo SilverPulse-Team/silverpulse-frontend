@@ -10,7 +10,7 @@ function ButtonContent({ isSubmitting, children }: Pick<AppButtonProps, 'isSubmi
   return (
     <>
       {isSubmitting && <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />}
-      <span>{children}</span>
+      <span className="inline-flex min-w-0 flex-row items-center justify-center gap-2 whitespace-nowrap">{children}</span>
     </>
   )
 }

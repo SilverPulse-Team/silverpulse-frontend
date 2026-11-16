@@ -1,6 +1,7 @@
 import { ArrowRight, CircleCheck, LockKeyhole, MousePointerClick, Radio, Rocket, Stethoscope } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { environmentHome, startDemoSession } from '../app/demoEnvironment'
+import { SilverPulseLogo } from '../components/brand/SilverPulseLogo'
 import type { ShellEnvironment } from '../components/layout/navigation'
 
 interface RoleCardProps {
@@ -25,13 +26,17 @@ export function LoginPage() {
 
   return (
     <main className="construction-space relative h-dvh overflow-hidden bg-deep-space px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
+      <div aria-hidden="true" className="login-cosmos">
+        <span className="login-cosmos__glow login-cosmos__glow--blue" />
+        <span className="login-cosmos__glow login-cosmos__glow--violet" />
+        <span className="login-cosmos__planet" />
+        <span className="login-cosmos__shooting-star" />
+      </div>
       <div className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col justify-center">
         <div className="mb-2 flex items-center justify-center gap-2.5 text-white sm:mb-3">
-          <span aria-hidden="true" className="grid size-10 place-items-center rounded-full border border-data text-sm font-semibold text-data">
-            SP
-          </span>
+          <SilverPulseLogo size="large" />
           <div>
-            <p className="text-base font-semibold tracking-tight">SilverPulse 2.0</p>
+            <p className="text-base font-semibold tracking-tight sm:text-lg">SilverPulse</p>
             <p className="text-[10px] text-slate-300">Mission Health Monitoring</p>
           </div>
         </div>
