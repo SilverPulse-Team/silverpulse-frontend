@@ -127,6 +127,20 @@ export function Sidebar({
       </nav>
 
       <div className="border-t border-white/10 p-3">
+        <div
+          className={`mb-2 flex min-h-14 items-center gap-3 rounded-control bg-white/5 px-3 ${showLabels ? 'justify-start' : 'justify-center'}`}
+          title={`${config.role} · ${config.profile}`}
+        >
+          <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-nasa-blue text-xs font-semibold text-white">
+            {environment === 'earth' ? 'MD' : environment === 'ship' ? 'A1' : 'MC'}
+          </span>
+          {showLabels && (
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold text-white">{config.role}</span>
+              <span className="block truncate text-[11px] text-slate-300">{config.profile}</span>
+            </span>
+          )}
+        </div>
         <button
           type="button"
           onClick={onLogout}
@@ -139,13 +153,6 @@ export function Sidebar({
           <LogOut aria-hidden="true" className="size-5 shrink-0" />
           {showLabels && <span>Cerrar sesión</span>}
         </button>
-        {showLabels && (
-          <p className="mt-3 text-[11px] leading-4 text-slate-400">
-            Prototipo independiente
-            <br />
-            NASA Space Apps Challenge 2026
-          </p>
-        )}
       </div>
     </div>
   )
