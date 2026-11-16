@@ -4,9 +4,8 @@
 
 La integración HTTP con FastAPI v0.2.0 está implementada y se verificó de
 extremo a extremo con datos sintéticos en un directorio SQLite aislado. El
-proveedor predeterminado sigue siendo MOCK: `getDataProvider()` usa mock si no
-se selecciona expresamente otro proveedor y `.env.example` conserva
-`VITE_DATA_PROVIDER=mock`.
+proveedor predeterminado es HTTP: `getDataProvider()` no cambia a fixtures si
+FastAPI falla y `.env.example` conserva `VITE_DATA_PROVIDER=http`.
 
 La configuración HTTP es local y opt-in. No se incluyen credenciales en el
 frontend y la aplicación no accede directamente a archivos `.db`.
@@ -34,6 +33,7 @@ el estado del enlace se obtiene de `GET /simulator/status`.
 | Catálogo y carga de importación | `GET /catalog/metrics`, `GET /ship/astronauts` |
 | Overview, tendencias y readiness | `GET /ship/astronauts/{id}/overview`, `/baselines`, `/trends`, `/return-readiness` |
 | Observaciones e importación | `GET /ship/observations`, `POST /ship/observations`, `POST /ship/observations/import` |
+| Decision 1 + Zoeh | `POST/GET /ship/analyses`, `GET /ship/analyses/{id}`, `PATCH .../answers`, `POST .../refresh`, `POST .../run` |
 | Informes de nave e inbox | `GET /ship/reports`, `GET /ship/reports/{id}`, `POST /ship/reports/generate`, `GET /ship/inbox` |
 | Bandeja y revisión en Tierra | `GET /earth/reports`, `GET /earth/reports/{id}`, `POST /earth/reports/{id}/review` |
 | Mission Control | `GET /simulator/status`, `GET /simulator/metrics`, `POST /simulator/config`, `POST /simulator/step` |

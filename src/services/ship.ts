@@ -1,5 +1,6 @@
 import type {
   ImportRequest,
+  AnalysisCreateInput,
   CountermeasureLogInput,
   ReportGenerateInput,
   SingleObservationRequest,
@@ -8,6 +9,8 @@ import type { ObservationFilters, PaginationOptions } from './dataProvider'
 import type { ApiClient } from './apiClient'
 import {
   parseAstronauts,
+  parseAnalysisSession,
+  parseAnalysisSessionList,
   parseBaselines,
   parseCountermeasures,
   parseCountermeasureLogResult,
@@ -73,6 +76,26 @@ export function createShipService(client: ApiClient) {
           offset: filters.offset,
         },
       }),
+
+    createAnalysis: (input: AnalysisCreateInput) =>
+      client.post('/ship/analyses', input, parseAnalysisSession),
+
+    getAnalysis: (analysisId: string) =>
+      client.get(`/ship/analyses/${encodeURIComponent(analysisId)}`, parseAnalysisSession),
+
+    getAnalyses: (options: PaginationOptions & { astronaut_id?: string } = {}) =>
+      client.get('/ship/analyses', parseAnalysisSessionList, {
+        query: { astronaut_id: options.astronaut_id, limit: options.limit, offset: options.offset },
+      }),
+
+    saveAnalysisAnswers: (analysisId: string, answers: Record<string, string>) =>
+      client.patch(`/ship/analyses/${encodeURIComponent(analysisId)}/answers`, { answers }, parseAnalysisSession),
+
+    refreshAnalysis: (analysisId: string) =>
+      client.post(`/ship/analyses/${encodeURIComponent(analysisId)}/refresh`, undefined, parseAnalysisSession),
+
+    runAnalysis: (analysisId: string) =>
+      client.post(`/ship/analyses/${encodeURIComponent(analysisId)}/run`, undefined, parseAnalysisSession),
 
     generateReport: (input: ReportGenerateInput) =>
       client.post('/ship/reports/generate', input, parseReport),

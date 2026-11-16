@@ -14,6 +14,30 @@ afterEach(() => {
 })
 
 describe('MissionControlPage', () => {
+  it('muestra un inicio accionable cuando todavía no hay comunicaciones en Nave', async () => {
+    const baseProvider = createMockDataProvider()
+    setDataProvider({
+      ...baseProvider,
+      getShipReports: vi.fn(async () => ({ items: [], total: 0, limit: 25, offset: 0 })),
+      getEarthReports: vi.fn(async () => ({ items: [], total: 0, limit: 25, offset: 0 })),
+      getShipInbox: vi.fn(async () => ({ items: [] })),
+    })
+    render(<MemoryRouter><MissionControlPage environment="ship" /></MemoryRouter>)
+
+    expect(await screen.findByRole('heading', { name: 'Comunicaciones' })).toBeTruthy()
+    const metricsHeading = await screen.findByRole('heading', { name: 'Resultados de simulación' })
+    const metricsCard = metricsHeading.closest('section')
+    const metricsGrid = metricsCard?.parentElement
+
+    expect(metricsCard?.classList.contains('h-full')).toBe(true)
+    expect(metricsGrid?.classList.contains('items-stretch')).toBe(true)
+    expect(await screen.findByRole('heading', { name: 'Aún no hay resultados' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Ir a los controles' }).getAttribute('href')).toBe('#simulator-controls-title')
+    expect(await screen.findByText('Todavía no hay comunicaciones')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Ir a informes de nave' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Importar observaciones' })).toBeTruthy()
+  })
+
   it('deshabilita las acciones mientras una configuración HTTP sigue pendiente', async () => {
     let finishConfiguration!: (status: SimulatorStatus) => void
     const baseProvider = createMockDataProvider()
