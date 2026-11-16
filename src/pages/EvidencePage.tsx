@@ -442,14 +442,12 @@ export function EvidencePage() {
 
         {activeTab === 'evaluation' && (
           <div className="space-y-8">
-            <MethodologyPanel />
             <section className="space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-ink">Corridas reproducibles</h2>
+                  <h2 className="text-xl font-semibold text-ink">Evaluación reproducible</h2>
                   <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
-                    Se envía únicamente fixture_id a POST /evaluation/run. Los valores y N provienen de
-                    la API; el frontend no estima mejoras.
+                    Ejecuta un escenario controlado y consulta resultados medidos por el backend. La explicación de los métodos A/B/C permanece en la pestaña Metodología.
                   </p>
                 </div>
                 <SecondaryButton

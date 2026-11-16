@@ -29,6 +29,8 @@ describe('EvidencePage', () => {
     render(<EvidencePage />)
 
     fireEvent.click(screen.getByRole('tab', { name: 'Evaluación' }))
+    expect(screen.queryByRole('heading', { name: 'Metodología de evaluación' })).toBeNull()
+    expect(screen.getByRole('heading', { name: 'Evaluación reproducible' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /Comparar análisis A\/B\/C/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Ejecutar escenario' }))
 
