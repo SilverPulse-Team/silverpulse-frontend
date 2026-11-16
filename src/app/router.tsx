@@ -14,6 +14,7 @@ import { EarthReportReviewPage } from '../pages/EarthReportReviewPage'
 import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
 import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
+import { AnalysisPage } from '../pages/AnalysisPage'
 import {
   endDemoSession,
   environmentHome,
@@ -58,6 +59,7 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
   const exactRoutes: Record<string, { label: string; section?: string }> = {
     '/login': { label: 'Acceso demo' },
     '/astronaut/import': { label: 'Importar datos', section: 'Nave' },
+    '/astronaut/analysis': { label: 'Análisis guiado', section: 'Nave' },
     '/astronaut/trends': { label: 'Tendencias', section: 'Nave' },
     '/astronaut/return': { label: 'Preparación de retorno', section: 'Nave' },
     '/medical': { label: 'Bandeja médica', section: 'Tierra' },
@@ -69,7 +71,7 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
     return {
       title: 'SilverPulse',
       breadcrumb: breadcrumbFor(environment, route.label, route.section),
-      fitViewport: path !== '/astronaut/trends' && path !== '/astronaut/import' && path !== '/astronaut/return',
+      fitViewport: !['/astronaut/trends', '/astronaut/import', '/astronaut/analysis', '/astronaut/return'].includes(path),
     }
   }
 
@@ -163,6 +165,7 @@ function ShellRouter() {
           path="/astronaut/import"
           element={<ImportPage />}
         />
+        <Route path="/astronaut/analysis" element={<AnalysisPage />} />
         <Route
           path="/astronaut/trends"
           element={

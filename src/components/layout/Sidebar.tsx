@@ -1,6 +1,6 @@
 import { Activity, LogOut, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
 import { Link } from 'react-router'
-import { environmentConfig, type ShellEnvironment } from './navigation'
+import { enabledNavigation, environmentConfig, type ShellEnvironment } from './navigation'
 
 interface SidebarProps {
   environment: ShellEnvironment
@@ -99,7 +99,7 @@ export function Sidebar({
 
       <nav aria-label={`Navegación de ${config.label}`} className="flex-1 overflow-y-auto px-3 pb-4">
         <ul className="space-y-1">
-          {config.navigation.map(({ label, href, icon: Icon }) => {
+          {enabledNavigation(config.navigation).map(({ label, href, icon: Icon }) => {
             const isActive = activePath === href
 
             return (

@@ -170,7 +170,7 @@ export function ShipReportDetailPage() {
   const backLink = (
     <Link
       to="/astronaut#ship-reports"
-      className="inline-flex min-h-11 items-center justify-center rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink hover:border-nasa-blue hover:text-nasa-blue"
+      className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink hover:border-nasa-blue hover:text-nasa-blue"
     >
       Volver a informes
     </Link>

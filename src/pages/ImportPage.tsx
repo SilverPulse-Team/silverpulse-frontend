@@ -859,7 +859,7 @@ export function ImportPage() {
           )}
           {currentStep === 4 && (
             <SecondaryButton type="button" onClick={resetFlow} disabled={isSubmitting} className="flex-1 sm:hidden">
-              Cancelar sin publicar
+              Cancelar
             </SecondaryButton>
           )}
         </div>

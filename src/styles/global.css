@@ -33,6 +33,12 @@ textarea {
   font: inherit;
 }
 
+/* Los controles de acción mantienen icono y etiqueta en una sola línea.
+   Los enlaces de URL con `break-all` quedan fuera porque son contenido, no botones. */
+:where(button, a)[class*="min-h-11"]:not([class*="break-all"]) {
+  white-space: nowrap;
+}
+
 .sp-field {
   height: 2.75rem;
   min-height: 2.75rem;

@@ -67,7 +67,7 @@ export function EarthReportReviewPage() {
   const backLink = (
     <Link
       to="/medical"
-      className="inline-flex min-h-11 items-center justify-center rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink hover:border-nasa-blue hover:text-nasa-blue"
+      className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink hover:border-nasa-blue hover:text-nasa-blue"
     >
       Volver a la bandeja
     </Link>
@@ -296,9 +296,9 @@ export function EarthReportReviewPage() {
                 type="submit"
                 disabled={submissionLoading || Boolean(reviewResult) || !note.trim()}
                 aria-busy={submissionLoading}
-                className="inline-flex min-h-11 items-center justify-center rounded-control bg-nasa-blue px-4 py-2 text-sm font-semibold text-white hover:bg-deep-space disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
+                className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-control bg-nasa-blue px-4 py-2 text-sm font-semibold text-white hover:bg-deep-space disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
               >
-                {submissionLoading ? 'Registrando revisión…' : 'Registrar revisión y encolar respuesta'}
+                {submissionLoading ? 'Registrando…' : 'Registrar revisión'}
               </button>
             </form>
           )}

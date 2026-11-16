@@ -253,6 +253,30 @@ export function createMockDataProvider(options: MockDataProviderOptions = {}): D
       return clone(getFilteredObservations(storedObservations, filters))
     },
 
+    async createAnalysis() {
+      throw new MockOperationUnavailableError('sesiones Decision 1 + Zoeh; usa VITE_DATA_PROVIDER=http')
+    },
+
+    async getAnalysis() {
+      throw new MockOperationUnavailableError('consulta de sesiones Decision 1 + Zoeh')
+    },
+
+    async getAnalyses() {
+      throw new MockOperationUnavailableError('listado de sesiones Decision 1 + Zoeh')
+    },
+
+    async saveAnalysisAnswers() {
+      throw new MockOperationUnavailableError('respuestas de sesiones Decision 1 + Zoeh')
+    },
+
+    async refreshAnalysis() {
+      throw new MockOperationUnavailableError('refresh de sesiones Decision 1 + Zoeh')
+    },
+
+    async runAnalysis() {
+      throw new MockOperationUnavailableError('ejecución de Zoeh')
+    },
+
     async generateReport(input: ReportGenerateInput) {
       assertFixtureRequest(input, reportGenerateRequestFixture, 'generación de informe')
       return clone(shipReportFixture)

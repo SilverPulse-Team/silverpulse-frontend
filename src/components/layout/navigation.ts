@@ -1,5 +1,6 @@
 import {
   Activity,
+  BrainCircuit,
   ChartNoAxesCombined,
   ClipboardCheck,
   FileText,
@@ -18,6 +19,15 @@ export interface NavigationItem {
   label: string
   href: string
   icon: LucideIcon
+}
+
+export const demoRouteCapabilities = new Set([
+  '/astronaut', '/astronaut/import', '/astronaut/analysis', '/astronaut/trends', '/astronaut/return',
+  '/mission-control', '/medical', '/evidence',
+])
+
+export function enabledNavigation(items: NavigationItem[]) {
+  return items.filter((item) => demoRouteCapabilities.has(item.href.split('#')[0]))
 }
 
 interface EnvironmentConfig {
@@ -39,6 +49,7 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     navigation: [
       { label: 'Resumen', href: '/astronaut', icon: House },
       { label: 'Importar datos', href: '/astronaut/import', icon: Upload },
+      { label: 'Análisis guiado', href: '/astronaut/analysis', icon: BrainCircuit },
       { label: 'Tendencias', href: '/astronaut/trends', icon: ChartNoAxesCombined },
       { label: 'Preparación de retorno', href: '/astronaut/return', icon: ClipboardCheck },
       { label: 'Informes', href: '/astronaut#ship-reports', icon: FileText },

@@ -1,4 +1,4 @@
-import { ClipboardList, History, Upload } from 'lucide-react'
+import { BrainCircuit, ClipboardList, History, Upload } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { EarthMessagesPanel } from '../components/dashboard/EarthMessagesPanel'
@@ -34,7 +34,7 @@ type RemoteState<T> =
   | { status: 'ready'; data: T }
 
 const actionLinkClassName =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-nasa-blue hover:text-nasa-blue'
+  'inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-control border border-line bg-card px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-nasa-blue hover:text-nasa-blue'
 
 const trendLabels: Record<string, string> = {
   stable: 'Tendencia textual: estable.',
@@ -253,6 +253,10 @@ export function AstronautOverviewPage() {
               <Link className={actionLinkClassName} to="/astronaut/import">
                 <Upload aria-hidden="true" className="size-4" />
                 Importar datos
+              </Link>
+              <Link className={actionLinkClassName} to="/astronaut/analysis">
+                <BrainCircuit aria-hidden="true" className="size-4" />
+                Ver análisis
               </Link>
               <Link className={actionLinkClassName} to="/astronaut/trends">
                 <History aria-hidden="true" className="size-4" />

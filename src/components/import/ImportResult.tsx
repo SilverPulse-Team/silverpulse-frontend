@@ -94,7 +94,7 @@ export function ImportResult({
             ))}
           </ul>
           <SecondaryButton type="button" onClick={onCorrectRows} className="mt-4">
-            Corregir filas rechazadas
+            Corregir filas
           </SecondaryButton>
         </div>
       )}

@@ -116,7 +116,9 @@ export function AppShell({
         />
         <main
           className={`mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 ${
-            fitViewport ? 'h-[calc(100dvh-5rem)] overflow-hidden py-4' : 'py-6 lg:py-8'
+            fitViewport
+              ? 'h-[calc(100dvh-5rem)] overflow-x-hidden overflow-y-auto overscroll-contain py-4'
+              : 'py-6 lg:py-8'
           }`}
         >
           {children}
