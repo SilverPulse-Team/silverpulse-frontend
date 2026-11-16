@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
 import { Topbar, type BreadcrumbItem } from './Topbar'
 import type { ShellEnvironment } from './navigation'
+import { AssistantWidget } from '../assistant'
 
 interface AppShellProps {
   environment: ShellEnvironment
@@ -124,6 +125,7 @@ export function AppShell({
           {children}
         </main>
       </div>
+      <AssistantWidget environment={environment} />
     </div>
   )
 }

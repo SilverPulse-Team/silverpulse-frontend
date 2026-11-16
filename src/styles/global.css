@@ -39,6 +39,17 @@ textarea {
   white-space: nowrap;
 }
 
+.assistant-launcher {
+  animation: assistant-arrive 180ms ease-out;
+}
+
+@keyframes assistant-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.96);
+  }
+}
+
 .sp-field {
   height: 2.75rem;
   min-height: 2.75rem;
@@ -277,8 +288,15 @@ input[type="date"].sp-field::-webkit-calendar-picker-indicator {
   .construction-orbit,
   .construction-satellite,
   .not-found-flight,
+  .assistant-launcher,
   .construction-space::before,
   .construction-space::after {
     animation: none !important;
+  }
+}
+
+@media (max-width: 479px) {
+  [role='dialog'][aria-label^='Asistente'] footer .grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -1,4 +1,4 @@
-import { BrainCircuit, ClipboardList, History, Upload } from 'lucide-react'
+import { ClipboardList, History, Upload } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { EarthMessagesPanel } from '../components/dashboard/EarthMessagesPanel'
@@ -253,10 +253,6 @@ export function AstronautOverviewPage() {
               <Link className={actionLinkClassName} to="/astronaut/import">
                 <Upload aria-hidden="true" className="size-4" />
                 Importar datos
-              </Link>
-              <Link className={actionLinkClassName} to="/astronaut/analysis">
-                <BrainCircuit aria-hidden="true" className="size-4" />
-                Ver análisis
               </Link>
               <Link className={actionLinkClassName} to="/astronaut/trends">
                 <History aria-hidden="true" className="size-4" />

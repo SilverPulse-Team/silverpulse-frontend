@@ -1,6 +1,5 @@
 import {
   Activity,
-  BrainCircuit,
   ChartNoAxesCombined,
   ClipboardCheck,
   FileText,
@@ -49,7 +48,6 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     navigation: [
       { label: 'Resumen', href: '/astronaut', icon: House },
       { label: 'Importar datos', href: '/astronaut/import', icon: Upload },
-      { label: 'Análisis guiado', href: '/astronaut/analysis', icon: BrainCircuit },
       { label: 'Tendencias', href: '/astronaut/trends', icon: ChartNoAxesCombined },
       { label: 'Preparación de retorno', href: '/astronaut/return', icon: ClipboardCheck },
       { label: 'Informes', href: '/astronaut#ship-reports', icon: FileText },
