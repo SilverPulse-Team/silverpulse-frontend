@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes, matchPath, useLocation, useNavigate } from 'react-router'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { AppShell } from '../components/layout/AppShell'
-import type { BreadcrumbItem } from '../components/layout/Topbar'
 import type { ShellEnvironment } from '../components/layout/navigation'
 import { LoadingSkeleton } from '../components/ui'
 import { AstronautOverviewPage } from '../pages/AstronautOverviewPage'
@@ -29,83 +28,16 @@ const EvidencePage = lazy(() =>
 )
 
 interface RouteInfo {
-  title: string
-  breadcrumb: BreadcrumbItem[]
   fitViewport: boolean
-}
-
-function breadcrumbFor(environment: ShellEnvironment, currentLabel: string, sectionLabel?: string): BreadcrumbItem[] {
-  const home = environmentHome[environment]
-  const items: BreadcrumbItem[] = [{ label: 'SilverPulse', href: home }]
-
-  if (sectionLabel) {
-    items.push({ label: sectionLabel, href: home })
-  }
-
-  items.push({ label: currentLabel })
-  return items
 }
 
 function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInfo {
   if (path === '/' || path === '/astronaut') {
     const isShipOverview = environment === 'ship'
-    return {
-      title: isShipOverview ? '' : 'SilverPulse',
-      breadcrumb: isShipOverview
-        ? []
-        : breadcrumbFor(environment, environment === 'mission-control' ? 'Resumen de nave' : 'Resumen'),
-      fitViewport: !isShipOverview,
-    }
+    return { fitViewport: !isShipOverview }
   }
 
-  const exactRoutes: Record<string, { label: string; section?: string }> = {
-    '/login': { label: 'Acceso demo' },
-    '/astronaut/import': { label: 'Importar datos', section: 'Nave' },
-    '/astronaut/analysis': { label: 'Análisis guiado', section: 'Nave' },
-    '/astronaut/trends': { label: 'Tendencias', section: 'Nave' },
-    '/astronaut/return': { label: 'Preparación de retorno', section: 'Nave' },
-    '/medical': { label: 'Bandeja médica', section: 'Tierra' },
-    '/evidence': { label: 'Evidencia' },
-  }
-
-  if (exactRoutes[path]) {
-    const route = exactRoutes[path]
-    return {
-      title: 'SilverPulse',
-      breadcrumb: breadcrumbFor(environment, route.label, route.section),
-      fitViewport: !['/astronaut/trends', '/astronaut/import', '/astronaut/analysis', '/astronaut/return'].includes(path),
-    }
-  }
-
-  if (path === '/mission-control') {
-    const label = environment === 'ship' ? 'Comunicaciones' : 'Control de enlace'
-    const section = environment === 'ship' ? 'Nave' : 'Mission Control'
-    return { title: 'SilverPulse', breadcrumb: breadcrumbFor(environment, label, section), fitViewport: true }
-  }
-
-  const shipReport = matchPath('/astronaut/reports/:id', path)
-  if (shipReport) {
-    return {
-      title: 'SilverPulse',
-      breadcrumb: breadcrumbFor(environment, shipReport.params.id ?? 'Informe', 'Informes'),
-      fitViewport: true,
-    }
-  }
-
-  const earthReport = matchPath('/medical/reports/:id', path)
-  if (earthReport) {
-    return {
-      title: 'SilverPulse',
-      breadcrumb: breadcrumbFor(environment, earthReport.params.id ?? 'Revisión', 'Revisiones'),
-      fitViewport: true,
-    }
-  }
-
-  return {
-    title: 'Página no encontrada',
-    breadcrumb: breadcrumbFor(environment, 'Error 404'),
-    fitViewport: true,
-  }
+  return { fitViewport: !['/astronaut/trends', '/astronaut/import', '/astronaut/analysis', '/astronaut/return'].includes(path) }
 }
 
 export function AppRouter() {
@@ -147,8 +79,6 @@ function ShellRouter() {
     <AppShell
       environment={environment}
       activePath={activePath}
-      title={routeInfo.title}
-      breadcrumb={routeInfo.breadcrumb}
       fitViewport={routeInfo.fitViewport}
       onLogout={logout}
     >

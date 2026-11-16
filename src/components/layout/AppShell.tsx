@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
-import { Topbar, type BreadcrumbItem } from './Topbar'
+import { Topbar } from './Topbar'
 import type { ShellEnvironment } from './navigation'
 import { AssistantWidget } from '../assistant'
 
 interface AppShellProps {
   environment: ShellEnvironment
   activePath: string
-  title: string
-  breadcrumb: BreadcrumbItem[]
   children: ReactNode
   fitViewport?: boolean
   onLogout?: () => void
@@ -17,8 +15,6 @@ interface AppShellProps {
 export function AppShell({
   environment,
   activePath,
-  title,
-  breadcrumb,
   children,
   fitViewport = false,
   onLogout,
@@ -110,8 +106,6 @@ export function AppShell({
       >
         <Topbar
           environment={environment}
-          title={title}
-          breadcrumb={breadcrumb}
           onOpenMenu={() => setIsMenuOpen(true)}
           menuButtonRef={menuButtonRef}
         />

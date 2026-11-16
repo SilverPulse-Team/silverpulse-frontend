@@ -20,10 +20,10 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('AppShell', () => {
-  it('no renderiza breadcrumbs ni título duplicado cuando la ruta de resumen los omite', () => {
+  it('no renderiza breadcrumbs ni título duplicado en el navbar reutilizable', () => {
     render(
       <MemoryRouter>
-        <AppShell environment="ship" activePath="/astronaut" title="" breadcrumb={[]}>
+        <AppShell environment="ship" activePath="/astronaut">
           <div>Contenido del resumen</div>
         </AppShell>
       </MemoryRouter>,
@@ -40,8 +40,6 @@ describe('AppShell', () => {
         <AppShell
           environment="ship"
           activePath="/astronaut/reports/RPT-1"
-          title="SilverPulse"
-          breadcrumb={[]}
           fitViewport
         >
           <div>Informe extenso</div>
