@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import type { ShipInboxMessage } from '../../services'
 import type { Report } from '../../types'
 import { EmptyState, ResponsiveDataTable, TimeStamp } from '../ui'
@@ -83,7 +84,20 @@ export function CommunicationLog({
       </p>
       {rows.length === 0 ? (
         <div className="mt-4">
-          <EmptyState title="Sin mensajes observables" description="No hay informes ni respuestas confirmadas en los endpoints consultados." />
+          <EmptyState
+            title="Todavía no hay comunicaciones"
+            description="El enlace está disponible, pero el recorrido comienza cuando generas un informe ORBIT VERIFY desde Nave. Después podrás ponerlo en cola, entregarlo a Tierra y observar la respuesta."
+            action={(
+              <div className="flex flex-wrap justify-center gap-2">
+                <Link to="/astronaut#ship-reports" className="inline-flex min-h-11 items-center rounded-control bg-nasa-blue px-4 text-sm font-semibold text-white">
+                  Ir a informes de nave
+                </Link>
+                <Link to="/astronaut/import" className="inline-flex min-h-11 items-center rounded-control border border-line px-4 text-sm font-semibold text-ink">
+                  Importar observaciones
+                </Link>
+              </div>
+            )}
+          />
         </div>
       ) : (
         <div className="mt-4">

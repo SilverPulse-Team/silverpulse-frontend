@@ -16,6 +16,7 @@ import type {
   SimulatorStatus,
 } from '../types'
 import { createSubmissionLock } from '../utils/submissionLock'
+import type { ShellEnvironment } from '../components/layout/navigation'
 
 type RemoteState<T> =
   | { status: 'loading' }
@@ -30,7 +31,7 @@ function addConfirmedStage(current: ConfirmedDemoStage[], stage: ConfirmedDemoSt
   return current.includes(stage) ? current : [...current, stage]
 }
 
-export function MissionControlPage() {
+export function MissionControlPage({ environment = 'mission-control' }: { environment?: ShellEnvironment }) {
   const provider = getDataProvider()
   const [statusState, setStatusState] = useState<RemoteState<SimulatorStatus>>({ status: 'loading' })
   const [metricsState, setMetricsState] = useState<RemoteState<SimulatorMetrics>>({ status: 'loading' })
@@ -185,8 +186,8 @@ export function MissionControlPage() {
     <div className="mx-auto max-w-7xl space-y-5">
       <PageHeader
         eyebrow="Simulador local · SilverPulse Sync"
-        title="Mission Control"
-        description="Simulación local de enlace diferido — no es una red espacial real."
+        title={environment === 'ship' ? 'Comunicaciones' : 'Mission Control'}
+        description="Controla el enlace DEMO y sigue informes de nave, entregas a Tierra y respuestas recibidas."
         badge={topBadge}
       />
 

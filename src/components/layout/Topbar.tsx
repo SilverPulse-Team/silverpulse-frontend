@@ -32,7 +32,7 @@ export function Topbar({ environment, title, breadcrumb, onOpenMenu, menuButtonR
         </button>
 
         <div className="min-w-0 flex-1">
-          <nav aria-label="Migas de pan" className="hidden sm:block">
+          {breadcrumb.length > 0 && <nav aria-label="Migas de pan" className="hidden sm:block">
             <ol className="flex items-center gap-2 text-xs text-muted">
               {breadcrumb.map((item, index) => (
                 <li key={`${item.label}-${index}`} className="flex items-center gap-2">
@@ -47,8 +47,8 @@ export function Topbar({ environment, title, breadcrumb, onOpenMenu, menuButtonR
                 </li>
               ))}
             </ol>
-          </nav>
-          <p className="truncate text-base font-semibold text-ink sm:mt-1">{title}</p>
+          </nav>}
+          {title && <p className="truncate text-base font-semibold text-ink sm:mt-1">{title}</p>}
         </div>
 
         <div className="hidden items-center gap-3 border-l border-line pl-4 sm:flex">

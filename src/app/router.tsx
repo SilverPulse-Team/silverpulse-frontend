@@ -50,8 +50,10 @@ function resolveRouteInfo(path: string, environment: ShellEnvironment): RouteInf
   if (path === '/' || path === '/astronaut') {
     const isShipOverview = environment === 'ship'
     return {
-      title: isShipOverview ? 'Panel del astronauta' : 'SilverPulse',
-      breadcrumb: breadcrumbFor(environment, environment === 'mission-control' ? 'Resumen de nave' : 'Resumen', environment === 'ship' ? 'Nave' : undefined),
+      title: isShipOverview ? '' : 'SilverPulse',
+      breadcrumb: isShipOverview
+        ? []
+        : breadcrumbFor(environment, environment === 'mission-control' ? 'Resumen de nave' : 'Resumen'),
       fitViewport: !isShipOverview,
     }
   }
@@ -178,7 +180,7 @@ function ShellRouter() {
           path="/astronaut/return"
           element={<ReturnReadinessPage />}
         />
-        <Route path="/mission-control" element={<MissionControlPage />} />
+        <Route path="/mission-control" element={<MissionControlPage environment={environment} />} />
         <Route path="/medical" element={<EarthReportsPage />} />
         <Route path="/medical/reports/:id" element={<EarthReportReviewPage />} />
         <Route path="/astronaut/reports/:id" element={<ShipReportDetailPage />} />

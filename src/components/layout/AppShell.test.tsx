@@ -20,6 +20,19 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('AppShell', () => {
+  it('no renderiza breadcrumbs ni título duplicado cuando la ruta de resumen los omite', () => {
+    render(
+      <MemoryRouter>
+        <AppShell environment="ship" activePath="/astronaut" title="" breadcrumb={[]}>
+          <div>Contenido del resumen</div>
+        </AppShell>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('navigation', { name: 'Migas de pan' })).toBeNull()
+    expect(screen.queryByText('Panel del astronauta')).toBeNull()
+  })
+
   it('permite scroll vertical en vistas altas que ocupan el viewport', () => {
     render(
       <MemoryRouter>
