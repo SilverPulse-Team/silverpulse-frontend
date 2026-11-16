@@ -10,7 +10,7 @@ interface AppShellProps {
   breadcrumb: BreadcrumbItem[]
   children: ReactNode
   fitViewport?: boolean
-  onChangeEnvironment?: () => void
+  onLogout?: () => void
 }
 
 export function AppShell({
@@ -20,7 +20,7 @@ export function AppShell({
   breadcrumb,
   children,
   fitViewport = false,
-  onChangeEnvironment,
+  onLogout,
 }: AppShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() =>
@@ -69,7 +69,7 @@ export function AppShell({
           activePath={activePath}
           expanded={isSidebarExpanded}
           onToggleExpanded={() => setIsSidebarExpanded((current) => !current)}
-          onChangeEnvironment={onChangeEnvironment}
+          onLogout={onLogout}
         />
       </aside>
 
@@ -93,9 +93,9 @@ export function AppShell({
               environment={environment}
               activePath={activePath}
               onClose={() => setIsMenuOpen(false)}
-              onChangeEnvironment={() => {
+              onLogout={() => {
                 setIsMenuOpen(false)
-                onChangeEnvironment?.()
+                onLogout?.()
               }}
             />
           </aside>

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes, matchPath, useLocation, useNavigate } from 'react-router'
 import { AppShell } from '../components/layout/AppShell'
 import type { BreadcrumbItem } from '../components/layout/Topbar'
@@ -14,7 +14,11 @@ import { EarthReportReviewPage } from '../pages/EarthReportReviewPage'
 import { LoginPage } from '../pages/LoginPage'
 import { ImportPage } from '../pages/ImportPage'
 import { ReturnReadinessPage } from '../pages/ReturnReadinessPage'
-import { environmentHome, environmentOrder, getStoredEnvironment, storeEnvironment } from './demoEnvironment'
+import {
+  endDemoSession,
+  environmentHome,
+  getStoredDemoSession,
+} from './demoEnvironment'
 
 const TrendsPage = lazy(() =>
   import('../pages/TrendsPage').then((module) => ({ default: module.TrendsPage })),
@@ -104,26 +108,35 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<LoginRoute />} />
       <Route path="/*" element={<ShellRouter />} />
     </Routes>
   )
 }
 
+function LoginRoute() {
+  const demoSession = getStoredDemoSession()
+  return demoSession
+    ? <Navigate to={environmentHome[demoSession]} replace />
+    : <LoginPage />
+}
+
 function ShellRouter() {
-  const [environment, setEnvironment] = useState<ShellEnvironment>(getStoredEnvironment)
+  const demoSession = getStoredDemoSession()
   const location = useLocation()
   const navigate = useNavigate()
+
+  if (!demoSession) {
+    return <Navigate to="/login" replace />
+  }
+
+  const environment = demoSession
   const routeInfo = resolveRouteInfo(location.pathname, environment)
   const activePath = location.pathname === '/' ? '/astronaut' : `${location.pathname}${location.hash}`
 
-  const changeEnvironment = () => {
-    const currentIndex = environmentOrder.indexOf(environment)
-    const nextEnvironment = environmentOrder[(currentIndex + 1) % environmentOrder.length]
-
-    storeEnvironment(nextEnvironment)
-    setEnvironment(nextEnvironment)
-    navigate(environmentHome[nextEnvironment], { replace: true })
+  const logout = () => {
+    endDemoSession()
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -133,7 +146,7 @@ function ShellRouter() {
       title={routeInfo.title}
       breadcrumb={routeInfo.breadcrumb}
       fitViewport={routeInfo.fitViewport}
-      onChangeEnvironment={changeEnvironment}
+      onLogout={logout}
     >
       <Routes>
         <Route

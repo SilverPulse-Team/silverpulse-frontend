@@ -1,4 +1,4 @@
-import { Activity, ArrowLeftRight, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
+import { Activity, LogOut, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
 import { Link } from 'react-router'
 import { environmentConfig, type ShellEnvironment } from './navigation'
 
@@ -9,7 +9,7 @@ interface SidebarProps {
   mobile?: boolean
   onClose?: () => void
   onToggleExpanded?: () => void
-  onChangeEnvironment?: () => void
+  onLogout?: () => void
 }
 
 export function Sidebar({
@@ -19,7 +19,7 @@ export function Sidebar({
   mobile = false,
   onClose,
   onToggleExpanded,
-  onChangeEnvironment,
+  onLogout,
 }: SidebarProps) {
   const config = environmentConfig[environment]
   const showLabels = mobile || expanded
@@ -129,14 +129,15 @@ export function Sidebar({
       <div className="border-t border-white/10 p-3">
         <button
           type="button"
-          onClick={onChangeEnvironment}
+          onClick={onLogout}
+          aria-label="Cerrar sesión"
           className={`sidebar-label flex min-h-11 w-full items-center gap-3 rounded-control px-3 font-normal text-slate-300 transition-colors hover:bg-white/10 hover:text-white ${
             showLabels ? 'justify-start' : 'justify-center'
           }`}
-          title="Cambiar entorno demo"
+          title="Cerrar sesión"
         >
-          <ArrowLeftRight aria-hidden="true" className="size-5 shrink-0" />
-          {showLabels && <span>Cambiar entorno demo</span>}
+          <LogOut aria-hidden="true" className="size-5 shrink-0" />
+          {showLabels && <span>Cerrar sesión</span>}
         </button>
         {showLabels && (
           <p className="mt-3 text-[11px] leading-4 text-slate-400">

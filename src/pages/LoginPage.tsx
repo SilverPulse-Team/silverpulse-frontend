@@ -1,6 +1,6 @@
 import { ArrowRight, CircleCheck, LockKeyhole, MousePointerClick, Radio, Rocket, Stethoscope } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { environmentHome, storeEnvironment } from '../app/demoEnvironment'
+import { environmentHome, startDemoSession } from '../app/demoEnvironment'
 import type { ShellEnvironment } from '../components/layout/navigation'
 
 interface RoleCardProps {
@@ -19,7 +19,7 @@ export function LoginPage() {
   const navigate = useNavigate()
 
   const selectRole = (environment: Extract<ShellEnvironment, 'ship' | 'earth'>) => {
-    storeEnvironment(environment)
+    startDemoSession(environment)
     navigate(environmentHome[environment], { replace: true })
   }
 
@@ -46,7 +46,7 @@ export function LoginPage() {
               ¿Desde qué entorno quieres explorar SilverPulse?
             </h1>
             <p className="mt-1.5 text-xs leading-4 text-muted sm:mt-2 sm:text-sm sm:leading-5">
-              Elige un perfil ficticio para conocer su flujo de trabajo. Podrás cambiar de entorno dentro del sistema.
+              Elige un perfil ficticio para iniciar una sesión demo. Cierra sesión desde el menú para elegir otro entorno.
             </p>
           </header>
 
@@ -92,7 +92,7 @@ export function LoginPage() {
           </div>
 
           <p className="mt-2 text-center text-[10px] leading-4 text-muted">
-            La selección cambia el contexto visual; no constituye autenticación ni autorización.
+            La sesión es demostrativa; no constituye autenticación ni autorización real.
           </p>
         </section>
       </div>
