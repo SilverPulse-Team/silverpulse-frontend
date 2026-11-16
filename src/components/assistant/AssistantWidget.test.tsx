@@ -22,6 +22,16 @@ const readySession: AnalysisSession = {
 afterEach(() => { cleanup(); resetDataProvider() })
 
 describe('AssistantWidget', () => {
+  it('permanece disponible en todas las vistas del entorno Nave y Tierra', () => {
+    setDataProvider(createMockDataProvider())
+    const shipView = render(<MemoryRouter initialEntries={['/mission-control']}><AssistantWidget environment="ship" /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: 'Abrir asistente de a bordo' })).toBeTruthy()
+    shipView.unmount()
+
+    render(<MemoryRouter initialEntries={['/evidence']}><AssistantWidget environment="earth" /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: 'Abrir asistente de revisión' })).toBeTruthy()
+  })
+
   it('muestra solo el asistente de nave y ejecuta una sesión real del provider', async () => {
     const base = createMockDataProvider()
     const createAnalysis = vi.fn(async () => readySession)

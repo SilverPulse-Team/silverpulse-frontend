@@ -31,6 +31,7 @@ describe('AppShell', () => {
 
     expect(screen.queryByRole('navigation', { name: 'Migas de pan' })).toBeNull()
     expect(screen.queryByText('Panel del astronauta')).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Informes' })).toBeNull()
   })
 
   it('permite scroll vertical en vistas altas que ocupan el viewport', () => {
