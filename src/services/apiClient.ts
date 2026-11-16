@@ -143,7 +143,7 @@ export class ApiClient {
   constructor(options: ApiClientOptions = {}) {
     this.baseUrl = resolveApiBaseUrl(options.baseUrl)
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
-    this.fetchImplementation = options.fetchImplementation ?? fetch
+    this.fetchImplementation = options.fetchImplementation ?? globalThis.fetch.bind(globalThis)
   }
 
   get<T>(path: string, parser: ResponseParser<T>, options: RequestOptions = {}): Promise<T> {
@@ -159,8 +159,17 @@ export class ApiClient {
     return this.request('POST', path, parser, options, body)
   }
 
+  patch<TResponse, TBody>(
+    path: string,
+    body: TBody,
+    parser: ResponseParser<TResponse>,
+    options: PostOptions = {},
+  ): Promise<TResponse> {
+    return this.request('PATCH', path, parser, options, body)
+  }
+
   private async request<T>(
-    method: 'GET' | 'POST',
+    method: 'GET' | 'POST' | 'PATCH',
     path: string,
     parser: ResponseParser<T>,
     options: PostOptions,

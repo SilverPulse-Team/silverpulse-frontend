@@ -88,13 +88,13 @@ export function ImportResult({
           <ul className="mt-3 space-y-3">
             {result.errors.map((error, index) => (
               <li key={`${error.row}-${error.code}-${index}`} className="rounded-control bg-nasa-red/5 p-3 text-sm text-muted">
-                <span className="font-semibold text-nasa-red">Fila {error.row} · {error.code}</span>
+                <span className="font-semibold text-nasa-red">Fila API {error.row} (índice desde 0) · {error.code}</span>
                 <span className="mt-1 block">{error.detail}</span>
               </li>
             ))}
           </ul>
           <SecondaryButton type="button" onClick={onCorrectRows} className="mt-4">
-            Corregir filas rechazadas
+            Corregir filas
           </SecondaryButton>
         </div>
       )}

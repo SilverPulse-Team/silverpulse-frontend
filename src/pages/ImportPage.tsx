@@ -120,6 +120,7 @@ const sourceKindOptions: Array<{ value: DataSourceKind; label: string }> = [
   { value: 'public_dataset', label: 'Dataset público' },
   { value: 'clinical_assessment', label: 'Evaluación clínica' },
   { value: 'manual', label: 'Registro manual' },
+  { value: 'synthetic', label: 'Sintético (demo)' },
 ]
 
 function getErrorMessage(error: unknown) {
@@ -169,6 +170,7 @@ export function ImportPage() {
   const [file, setFile] = useState<File | null>(null)
   const [previewState, setPreviewState] = useState<PreviewState>('idle')
   const [draftRows, setDraftRows] = useState<ImportDraftRow[]>([])
+  const [fileSource, setFileSource] = useState<DataSource | null>(null)
   const [parseErrors, setParseErrors] = useState<ImportParseError[]>([])
   const [backendRowErrors, setBackendRowErrors] = useState<ImportRowError[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
@@ -214,15 +216,22 @@ export function ImportPage() {
     () => validateImportRows(draftRows, metrics, form.sourceKind),
     [draftRows, form.sourceKind, metrics],
   )
-  const source: DataSource = useMemo(() => ({
-    id: form.sourceId.trim(),
-    kind: form.sourceKind,
-    provider: form.provider.trim(),
-    device_model: null,
-    license: null,
-    citation: null,
-    is_synthetic: sourceType === 'synthetic',
-  }), [form.provider, form.sourceId, form.sourceKind, sourceType])
+  const source: DataSource = useMemo(() => {
+    const id = form.sourceId.trim()
+    const provider = form.provider.trim()
+    const sameFileSource = fileSource !== null
+      && fileSource.id === id && fileSource.provider === provider && fileSource.kind === form.sourceKind
+    return {
+      id,
+      kind: form.sourceKind,
+      provider,
+      device_model: sameFileSource ? fileSource.device_model ?? null : null,
+      license: sameFileSource ? fileSource.license ?? null : null,
+      citation: sameFileSource ? fileSource.citation ?? null : null,
+      // Un archivo declarado sintético nunca se reetiqueta como no sintético al editar el formulario.
+      is_synthetic: sourceType === 'synthetic' || form.sourceKind === 'synthetic' || fileSource?.is_synthetic === true,
+    }
+  }, [fileSource, form.provider, form.sourceId, form.sourceKind, sourceType])
   const requestResult = useMemo(() => buildImportRequest({
     astronautId: form.astronautId,
     source,
@@ -236,6 +245,7 @@ export function ImportPage() {
     setSourceType(null)
     setForm({ ...defaultForm, astronautId: firstAstronaut })
     setFile(null)
+    setFileSource(null)
     setPreviewState('idle')
     setDraftRows([])
     setParseErrors([])
@@ -252,6 +262,7 @@ export function ImportPage() {
     setNotice('')
     setSubmissionState({ status: 'idle' })
     setFile(null)
+    setFileSource(null)
     setDraftRows([])
     setParseErrors([])
     setBackendRowErrors([])
@@ -280,6 +291,7 @@ export function ImportPage() {
 
   const acceptFile = async (candidate: File | undefined) => {
     if (!candidate || sourceType === 'synthetic' || sourceType === null) return
+    setFileSource(null)
 
     const requiredExtension = extensionFor(sourceType)
     if (!candidate.name.toLowerCase().endsWith(requiredExtension)) {
@@ -314,6 +326,17 @@ export function ImportPage() {
       setParseErrors(parsed.errors)
       setBackendRowErrors([])
       setSubmissionState({ status: 'idle' })
+      const declaredSource = parsed.source
+      if (declaredSource) {
+        // La procedencia declarada en un ImportRequest canónico prevalece sobre los campos manuales.
+        setFileSource(declaredSource)
+        setForm((previous) => ({
+          ...previous,
+          provider: declaredSource.provider,
+          sourceId: declaredSource.id,
+          sourceKind: declaredSource.kind,
+        }))
+      }
       setDraftRows(mapObservations(parsed.rows, {
         phase: form.phase,
         quality: 'unknown',
@@ -621,9 +644,15 @@ export function ImportPage() {
             </div>
           )}
 
+          {fileSource && (
+            <AlertNotice title="Procedencia leída del archivo" tone="notice">
+              <p>{`Fuente ${fileSource.id} · tipo ${fileSource.kind} · ${fileSource.is_synthetic ? 'datos sintéticos (demo)' : 'datos no sintéticos'}. Se conserva al registrar las observaciones.`}</p>
+            </AlertNotice>
+          )}
+
           {isSynthetic && (
             <AlertNotice title="Escenario sintético seleccionado" tone="notice">
-              <p>SCENARIO-001 contiene registros ficticios del mock v0.2.0. No representa datos médicos reales ni una conexión activa con sensores.</p>
+              <p>SCENARIO-001 contiene valores sintéticos de demostración v0.2.0. Al confirmar, se envían al proveedor activo. No representan datos médicos reales ni una conexión a sensores.</p>
             </AlertNotice>
           )}
         </section>
@@ -636,7 +665,7 @@ export function ImportPage() {
             <p className="mt-1 text-sm leading-6 text-muted">Las unidades reconocidas proceden de GET /catalog/metrics.</p>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                ['Origen', isSynthetic ? 'Sintético · DEMO' : `Archivo ${sourceType?.toUpperCase()}`],
+                ['Origen', isSynthetic ? 'Sintético · DEMO' : `Archivo ${sourceType?.toUpperCase()}${source.is_synthetic ? ' · Sintético (demo)' : ''}`],
                 ['Proveedor', form.provider],
                 ['Astronauta', form.astronautId],
                 ['Fase / actividad', `${form.phase} · ${form.activity}`],
@@ -859,7 +888,7 @@ export function ImportPage() {
           )}
           {currentStep === 4 && (
             <SecondaryButton type="button" onClick={resetFlow} disabled={isSubmitting} className="flex-1 sm:hidden">
-              Cancelar sin publicar
+              Cancelar
             </SecondaryButton>
           )}
         </div>

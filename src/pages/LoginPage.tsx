@@ -1,6 +1,7 @@
 import { ArrowRight, CircleCheck, LockKeyhole, MousePointerClick, Radio, Rocket, Stethoscope } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { environmentHome, storeEnvironment } from '../app/demoEnvironment'
+import { environmentHome, startDemoSession } from '../app/demoEnvironment'
+import { SilverPulseLogo } from '../components/brand/SilverPulseLogo'
 import type { ShellEnvironment } from '../components/layout/navigation'
 
 interface RoleCardProps {
@@ -19,19 +20,23 @@ export function LoginPage() {
   const navigate = useNavigate()
 
   const selectRole = (environment: Extract<ShellEnvironment, 'ship' | 'earth'>) => {
-    storeEnvironment(environment)
+    startDemoSession(environment)
     navigate(environmentHome[environment], { replace: true })
   }
 
   return (
     <main className="construction-space relative h-dvh overflow-hidden bg-deep-space px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
+      <div aria-hidden="true" className="login-cosmos">
+        <span className="login-cosmos__glow login-cosmos__glow--blue" />
+        <span className="login-cosmos__glow login-cosmos__glow--violet" />
+        <span className="login-cosmos__planet" />
+        <span className="login-cosmos__shooting-star" />
+      </div>
       <div className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col justify-center">
         <div className="mb-2 flex items-center justify-center gap-2.5 text-white sm:mb-3">
-          <span aria-hidden="true" className="grid size-10 place-items-center rounded-full border border-data text-sm font-semibold text-data">
-            SP
-          </span>
+          <SilverPulseLogo size="large" />
           <div>
-            <p className="text-base font-semibold tracking-tight">SilverPulse 2.0</p>
+            <p className="text-base font-semibold tracking-tight sm:text-lg">SilverPulse</p>
             <p className="text-[10px] text-slate-300">Mission Health Monitoring</p>
           </div>
         </div>
@@ -46,7 +51,7 @@ export function LoginPage() {
               ¿Desde qué entorno quieres explorar SilverPulse?
             </h1>
             <p className="mt-1.5 text-xs leading-4 text-muted sm:mt-2 sm:text-sm sm:leading-5">
-              Elige un perfil ficticio para conocer su flujo de trabajo. Podrás cambiar de entorno dentro del sistema.
+              Elige un perfil ficticio para iniciar una sesión demo. Cierra sesión desde el menú para elegir otro entorno.
             </p>
           </header>
 
@@ -92,7 +97,7 @@ export function LoginPage() {
           </div>
 
           <p className="mt-2 text-center text-[10px] leading-4 text-muted">
-            La selección cambia el contexto visual; no constituye autenticación ni autorización.
+            La sesión es demostrativa; no constituye autenticación ni autorización real.
           </p>
         </section>
       </div>

@@ -2,6 +2,7 @@ import type { ShellEnvironment } from '../components/layout/navigation'
 
 export const environmentOrder: ShellEnvironment[] = ['ship', 'earth', 'mission-control']
 export const environmentStorageKey = 'silverpulse-demo-environment'
+export const demoSessionStorageKey = 'silverpulse-demo-session'
 
 export const environmentHome: Record<ShellEnvironment, string> = {
   ship: '/astronaut',
@@ -22,10 +23,23 @@ export function getStoredEnvironment(): ShellEnvironment {
   return 'ship'
 }
 
-export function storeEnvironment(environment: ShellEnvironment) {
+export function getStoredDemoSession(): ShellEnvironment | null {
   try {
-    window.sessionStorage.setItem(environmentStorageKey, environment)
+    const storedSession = window.sessionStorage.getItem(demoSessionStorageKey)
+    return environmentOrder.includes(storedSession as ShellEnvironment)
+      ? (storedSession as ShellEnvironment)
+      : null
   } catch {
-    // The visual context can still change for the current page without storage.
+    return null
   }
+}
+
+export function startDemoSession(environment: ShellEnvironment) {
+  window.sessionStorage.setItem(environmentStorageKey, environment)
+  window.sessionStorage.setItem(demoSessionStorageKey, environment)
+}
+
+export function endDemoSession() {
+  window.sessionStorage.removeItem(demoSessionStorageKey)
+  window.sessionStorage.removeItem(environmentStorageKey)
 }

@@ -18,7 +18,7 @@ export type {
   ShipInboxMessage,
 } from './dataProvider'
 export type { EvaluationResult, EvaluationRunInput, EvaluationRunResult } from '../types'
-export { resolveDataProviderMode, resolveMockScenario } from './dataProvider'
+export { resolveDataProviderMode, resolveMockScenario, resolveShipAssistantEnabled } from './dataProvider'
 export { ApiClient, ApiClientError, resolveApiBaseUrl } from './apiClient'
 export { createHttpDataProvider } from './httpDataProvider'
 

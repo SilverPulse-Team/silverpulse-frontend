@@ -1,26 +1,23 @@
+import { Menu } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
-import { Topbar, type BreadcrumbItem } from './Topbar'
 import type { ShellEnvironment } from './navigation'
+import { AssistantWidget } from '../assistant'
 
 interface AppShellProps {
   environment: ShellEnvironment
   activePath: string
-  title: string
-  breadcrumb: BreadcrumbItem[]
   children: ReactNode
   fitViewport?: boolean
-  onChangeEnvironment?: () => void
+  onLogout?: () => void
 }
 
 export function AppShell({
   environment,
   activePath,
-  title,
-  breadcrumb,
   children,
   fitViewport = false,
-  onChangeEnvironment,
+  onLogout,
 }: AppShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() =>
@@ -69,7 +66,7 @@ export function AppShell({
           activePath={activePath}
           expanded={isSidebarExpanded}
           onToggleExpanded={() => setIsSidebarExpanded((current) => !current)}
-          onChangeEnvironment={onChangeEnvironment}
+          onLogout={onLogout}
         />
       </aside>
 
@@ -93,9 +90,9 @@ export function AppShell({
               environment={environment}
               activePath={activePath}
               onClose={() => setIsMenuOpen(false)}
-              onChangeEnvironment={() => {
+              onLogout={() => {
                 setIsMenuOpen(false)
-                onChangeEnvironment?.()
+                onLogout?.()
               }}
             />
           </aside>
@@ -107,21 +104,26 @@ export function AppShell({
           isSidebarExpanded ? 'md:pl-[240px]' : 'md:pl-20'
         }`}
       >
-        <Topbar
-          environment={environment}
-          title={title}
-          breadcrumb={breadcrumb}
-          onOpenMenu={() => setIsMenuOpen(true)}
-          menuButtonRef={menuButtonRef}
-        />
+        <button
+          ref={menuButtonRef}
+          type="button"
+          onClick={() => setIsMenuOpen(true)}
+          className="fixed left-3 top-3 z-20 grid size-11 place-items-center rounded-control border border-line bg-card/95 text-ink shadow-card backdrop-blur hover:border-nasa-blue hover:text-nasa-blue md:hidden"
+          aria-label="Abrir menú"
+        >
+          <Menu aria-hidden="true" className="size-5" />
+        </button>
         <main
           className={`mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 ${
-            fitViewport ? 'h-[calc(100dvh-5rem)] overflow-hidden py-4' : 'py-6 lg:py-8'
+            fitViewport
+              ? 'h-dvh overflow-x-hidden overflow-y-auto overscroll-contain pb-4 pt-20 md:py-4'
+              : 'pb-6 pt-20 md:py-6 lg:py-8'
           }`}
         >
           {children}
         </main>
       </div>
+      <AssistantWidget environment={environment} />
     </div>
   )
 }

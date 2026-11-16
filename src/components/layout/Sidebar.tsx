@@ -1,6 +1,7 @@
-import { Activity, ArrowLeftRight, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
+import { Activity, LogOut, PanelLeftClose, Radio, Stethoscope, X } from 'lucide-react'
 import { Link } from 'react-router'
-import { environmentConfig, type ShellEnvironment } from './navigation'
+import { SilverPulseLogo } from '../brand/SilverPulseLogo'
+import { enabledNavigation, environmentConfig, type ShellEnvironment } from './navigation'
 
 interface SidebarProps {
   environment: ShellEnvironment
@@ -9,7 +10,7 @@ interface SidebarProps {
   mobile?: boolean
   onClose?: () => void
   onToggleExpanded?: () => void
-  onChangeEnvironment?: () => void
+  onLogout?: () => void
 }
 
 export function Sidebar({
@@ -19,7 +20,7 @@ export function Sidebar({
   mobile = false,
   onClose,
   onToggleExpanded,
-  onChangeEnvironment,
+  onLogout,
 }: SidebarProps) {
   const config = environmentConfig[environment]
   const showLabels = mobile || expanded
@@ -99,7 +100,7 @@ export function Sidebar({
 
       <nav aria-label={`Navegación de ${config.label}`} className="flex-1 overflow-y-auto px-3 pb-4">
         <ul className="space-y-1">
-          {config.navigation.map(({ label, href, icon: Icon }) => {
+          {enabledNavigation(config.navigation).map(({ label, href, icon: Icon }) => {
             const isActive = activePath === href
 
             return (
@@ -127,24 +128,32 @@ export function Sidebar({
       </nav>
 
       <div className="border-t border-white/10 p-3">
+        <div
+          className={`mb-2 flex min-h-14 items-center gap-3 rounded-control bg-white/5 px-3 ${showLabels ? 'justify-start' : 'justify-center'}`}
+          title={`${config.role} · ${config.profile}`}
+        >
+          <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-nasa-blue text-xs font-semibold text-white">
+            {environment === 'earth' ? 'MD' : environment === 'ship' ? 'A1' : 'MC'}
+          </span>
+          {showLabels && (
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold text-white">{config.role}</span>
+              <span className="block truncate text-[11px] text-slate-300">{config.profile}</span>
+            </span>
+          )}
+        </div>
         <button
           type="button"
-          onClick={onChangeEnvironment}
+          onClick={onLogout}
+          aria-label="Cerrar sesión"
           className={`sidebar-label flex min-h-11 w-full items-center gap-3 rounded-control px-3 font-normal text-slate-300 transition-colors hover:bg-white/10 hover:text-white ${
             showLabels ? 'justify-start' : 'justify-center'
           }`}
-          title="Cambiar entorno demo"
+          title="Cerrar sesión"
         >
-          <ArrowLeftRight aria-hidden="true" className="size-5 shrink-0" />
-          {showLabels && <span>Cambiar entorno demo</span>}
+          <LogOut aria-hidden="true" className="size-5 shrink-0" />
+          {showLabels && <span>Cerrar sesión</span>}
         </button>
-        {showLabels && (
-          <p className="mt-3 text-[11px] leading-4 text-slate-400">
-            Prototipo independiente
-            <br />
-            NASA Space Apps Challenge 2026
-          </p>
-        )}
       </div>
     </div>
   )
@@ -157,12 +166,5 @@ function SatelliteEnvironmentIcon({ environment }: { environment: ShellEnvironme
 }
 
 function BrandMark() {
-  return (
-    <span
-      aria-hidden="true"
-      className="grid size-11 shrink-0 place-items-center rounded-full border border-data font-semibold text-data transition-colors hover:bg-data/10"
-    >
-      SP
-    </span>
-  )
+  return <SilverPulseLogo />
 }

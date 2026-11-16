@@ -86,45 +86,38 @@ El modo de datos se selecciona explícitamente desde una copia local de
 `.env.example`:
 
 ```bash
-VITE_DATA_PROVIDER=mock
+VITE_DATA_PROVIDER=http
 VITE_MOCK_SCENARIO=offline
 ```
 
-Los escenarios disponibles son `offline`, `after-delivery` y `after-return`.
+Para pruebas aisladas se puede seleccionar `VITE_DATA_PROVIDER=mock`. Sus
+escenarios disponibles son `offline`, `after-delivery` y `after-return`.
 Todos reproducen snapshots sintéticos del contrato v0.2.0; no guardan datos ni
 confirman ACK reales. `offline` es el valor predeterminado y mantiene vacía la
 bandeja médica de Tierra.
 
 Las páginas deben consumir la interfaz común de `src/services/dataProvider.ts`,
 obtenida mediante `getDataProvider()`, en lugar de importar fixtures directamente.
-Esta fase usa exclusivamente el proveedor mock. El proveedor HTTP está preparado
-para una etapa futura, pero no se debe activar ni apuntar a un backend ahora.
+El proveedor HTTP es el predeterminado de la demo integrada. Configura
+`VITE_API_BASE_URL` en `.env.local`; las variables `VITE_*` son públicas y no
+deben contener secretos. Un fallo HTTP nunca activa MOCK automáticamente.
 
-### Integración futura con FastAPI (no activar en esta fase)
+### Integración local opcional con FastAPI
 
-`src/services/httpDataProvider.ts` y sus parsers se conservan para una futura
-integración aprobada con FastAPI v0.2.0. Durante la implementación frontend se
-debe mantener `VITE_DATA_PROVIDER=mock`; no cambiarlo a `http` ni ejecutar
-solicitudes a endpoints reales. La base URL siguiente es solo una referencia
-futura:
+`src/services/httpDataProvider.ts` y sus parsers integran FastAPI v0.2.0. Para
+usarlos localmente, configura:
 
 ```bash
 VITE_DATA_PROVIDER=http
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-Las variables `VITE_*` quedan visibles en el bundle del navegador y nunca deben
-contener tokens, contraseñas ni otros secretos. El cliente no incluye credenciales
-por defecto.
-
-FastAPI debe permitir CORS para el origen de desarrollo de Vite, normalmente
-`http://localhost:5173`, incluyendo los métodos `GET`, `POST` y `OPTIONS` y el
-header `Content-Type`. Esta configuración se realiza en el backend; no se resuelve
-deshabilitando seguridad en el navegador.
-
-Cuando se autorice esa etapa, `GET /health` comprobará únicamente que FastAPI
-responde; no indicará que el enlace simulado con Tierra esté online. Ese estado
-procederá exclusivamente de `GET /simulator/status`.
+FastAPI debe permitir CORS para el origen de Vite, normalmente
+`http://localhost:5173`. El flujo importación → informe → entrega diferida →
+revisión → retorno se verificó localmente con datos sintéticos. MOCK permanece
+disponible solo por selección explícita y las pruebas de backend/frontend son
+independientes. Consulta la [guía de integración API](./docs/api-integration.md)
+para los resultados y límites de la verificación.
 
 Consulta la [guía de integración API](./docs/api-integration.md) para el preflight
 de FastAPI y la matriz de endpoints, el [guion demo E2E](./docs/demo-e2e.md)

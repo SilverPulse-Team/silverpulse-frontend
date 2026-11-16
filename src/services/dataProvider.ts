@@ -1,5 +1,8 @@
 import type {
   Astronaut,
+  AnalysisCreateInput,
+  AnalysisSession,
+  AnalysisSessionList,
   Baseline,
   CountermeasureLogInput,
   CountermeasurePlan,
@@ -99,6 +102,12 @@ export interface DataProvider {
   importObservations(input: ImportRequest): Promise<ImportResult>
   createShipObservation(input: SingleObservationRequest): Promise<Observation>
   getShipObservations(filters?: ObservationFilters): Promise<ListObservations>
+  createAnalysis(input: AnalysisCreateInput): Promise<AnalysisSession>
+  getAnalysis(analysisId: string): Promise<AnalysisSession>
+  getAnalyses(options?: PaginationOptions & { astronaut_id?: string }): Promise<AnalysisSessionList>
+  saveAnalysisAnswers(analysisId: string, answers: Record<string, string>): Promise<AnalysisSession>
+  refreshAnalysis(analysisId: string): Promise<AnalysisSession>
+  runAnalysis(analysisId: string): Promise<AnalysisSession>
   generateReport(input: ReportGenerateInput): Promise<Report>
   getShipReports(options?: PaginationOptions): Promise<ListReports>
   getShipReport(reportId: string): Promise<Report>
@@ -116,15 +125,23 @@ export interface DataProvider {
 }
 
 export function resolveDataProviderMode(value = import.meta.env.VITE_DATA_PROVIDER): DataProviderMode {
-  if (value === undefined || value === '' || value === 'mock') {
-    return 'mock'
-  }
-
-  if (value === 'http') {
+  if (value === undefined || value === '' || value === 'http') {
     return 'http'
   }
 
+  if (value === 'mock') {
+    return 'mock'
+  }
+
   throw new Error(`VITE_DATA_PROVIDER debe ser "mock" o "http"; se recibió "${value}".`)
+}
+
+/**
+ * El asistente de a bordo requiere los endpoints /ship/analyses de la rama del asistente conversacional.
+ * El backend MVP no los expone, así que el asistente queda desactivado salvo `VITE_ENABLE_SHIP_ASSISTANT=true`.
+ */
+export function resolveShipAssistantEnabled(value = import.meta.env.VITE_ENABLE_SHIP_ASSISTANT): boolean {
+  return value === 'true'
 }
 
 export function resolveMockScenario(value = import.meta.env.VITE_MOCK_SCENARIO): MockScenario {

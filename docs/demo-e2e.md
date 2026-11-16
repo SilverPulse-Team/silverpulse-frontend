@@ -22,41 +22,40 @@ El resto del recorrido —dashboard, tendencias, readiness e informe— puede
 explorarse con snapshots demo. Los snapshots `offline`, `after-delivery` y
 `after-return` no conservan una secuencia al cambiar de uno a otro.
 
-## E2E futuro: pasos y evidencia requerida
+## E2E con FastAPI local
 
-Esta secuencia no debe ejecutarse durante la fase frontend-only. Cuando el
-backend esté aprobado e implementado, usar un fixture oficial `is_synthetic=true`.
-Si se necesita una observación individual `preflight`, solicitar un fixture
-canónico; no inferirla del baseline ni fabricar una medición. No usar archivos DB
-directamente.
+El recorrido se verificó con FastAPI v0.2.0, proveedor HTTP y observaciones
+sintéticas en almacenamiento local aislado. Para repetirlo, activa
+`VITE_DATA_PROVIDER=http`, configura `VITE_API_BASE_URL` en `.env.local` y
+permite CORS desde el origen Vite. No uses archivos DB directamente.
 
-1. Ejecuta preflight HTTP (`/docs` u `/openapi.json`, `GET /health`) y confirma
-   las respuestas contra `docs/contract.md`.
-2. Importa las observaciones por `/astronaut/import`; guarda la respuesta real
-   de `POST /ship/observations/import` y verifica la procedencia sintética.
-3. Revisa `/astronaut`, `/astronaut/trends` y `/astronaut/return`; compara
-   valores, unidades, fechas y fases con respuestas de API, sin inferir
-   mediciones faltantes.
-4. Genera un informe y conserva el `report_id` devuelto.
-5. Configura el simulador offline; confirma que `/medical` no muestra el
-   informe antes de recibirlo.
-6. Configura el modo de enlace aprobado por el contrato y ejecuta el paso
-   soportado por backend. Confirma la entrega con `GET /earth/reports` y estado
-   `delivered`; no deducir entrega del cambio de modo o de un contador.
-7. Revisa el informe en `/medical/reports/{report_id}`. Confirma que la nota no
-   aparece en `/astronaut` ni `/ship/inbox` antes de retorno.
-8. Verifica el retorno consultando `GET /ship/inbox`, y registra la respuesta
-   real, el mensaje, la nota y su fecha.
-9. Si el backend admite casos de prueba, registra también falta de fuerza/
-   equilibrio, valores `null`, ACK perdido y API IA deshabilitada. No inferir
-   respuestas cuando esos casos no estén disponibles.
+1. Confirma `/docs`, OpenAPI v0.2.0, `GET /health` y CORS desde Vite.
+2. Importa el escenario sintético de dos observaciones. En la ejecución
+   verificada se aceptaron frecuencia cardíaca (71 bpm) y duración de sueño
+   (372 min); dashboard y tendencias las leyeron desde el backend.
+3. Genera un informe local y configura el simulador como `offline`. Comprueba
+   que la cola de nave contiene el informe y que `/medical` aún muestra cero
+   informes.
+4. Cambia a `delayed` y avanza el reloj simulado. Confirma la recepción solo
+   cuando `/earth/reports` devuelva el informe con estado entregado y marca de
+   tiempo; el cambio de modo por sí solo no confirma recepción.
+5. Abre `/medical/reports/{report_id}` y guarda la revisión ficticia con
+   `is_demo=true`. La respuesta confirma `review_status=reviewed` y deja el
+   mensaje de retorno en cola.
+6. Avanza el simulador otra vez y confirma la respuesta únicamente cuando
+   `/ship/inbox` incluya el informe y el mensaje de retorno.
+7. Recarga el navegador y verifica que el informe entregado, la revisión y la
+   respuesta recibida sigan visibles desde la API.
 
 `docs/demo-sync-frontend.md` contiene detalles de endpoints, status y estados
-del simulador. Adjunta request/response anonimizado o evidencia visual al
-ejecutar la demo; no incluyas credenciales.
+del simulador. Se observó una entrega en cada dirección, cero mensajes en cola
+al finalizar y cero duplicados reportados en esa ejecución. Esos valores son
+solo evidencia del escenario local, no una garantía de rendimiento. La nota de
+revisión es ficticia; el análisis no es diagnóstico ni recomendación clínica.
 
-## Resultado y bloqueos actuales
+## Límites
 
-No se ejecutaron solicitudes a backend en esta fase. Los pasos de entrega,
-revisión y retorno, ACK perdido y desactivación de API IA quedan para una fase
-futura. El mock no finge esos resultados.
+No se verificaron autenticación, pérdida de ACK, reinicio del proceso ni
+desactivación de API IA. El contrato no incluye endpoint de reinicio. No infieras
+mediciones faltantes, resultado clínico ni entrega a partir del modo o de una
+cola vacía.

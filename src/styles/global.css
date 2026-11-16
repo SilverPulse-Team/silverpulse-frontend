@@ -33,6 +33,23 @@ textarea {
   font: inherit;
 }
 
+/* Los controles de acción mantienen icono y etiqueta en una sola línea.
+   Los enlaces de URL con `break-all` quedan fuera porque son contenido, no botones. */
+:where(button, a)[class*="min-h-11"]:not([class*="break-all"]) {
+  white-space: nowrap;
+}
+
+.assistant-launcher {
+  animation: assistant-arrive 180ms ease-out;
+}
+
+@keyframes assistant-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.96);
+  }
+}
+
 .sp-field {
   height: 2.75rem;
   min-height: 2.75rem;
@@ -84,6 +101,76 @@ input[type="date"].sp-field::-webkit-calendar-picker-indicator {
     radial-gradient(circle at 18% 22%, rgb(38 135 201 / 20%) 0, transparent 24%),
     radial-gradient(circle at 82% 78%, rgb(11 61 145 / 30%) 0, transparent 28%),
     linear-gradient(145deg, var(--sp-color-deep-space), var(--sp-color-midnight-surface));
+}
+
+.login-cosmos {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-cosmos__glow {
+  position: absolute;
+  width: min(70vw, 64rem);
+  aspect-ratio: 1.7;
+  filter: blur(2rem);
+  opacity: 0.45;
+  animation: login-cosmos-drift 24s ease-in-out infinite alternate;
+}
+
+.login-cosmos__glow--blue {
+  top: -25%;
+  left: -20%;
+  background: radial-gradient(ellipse, rgb(38 135 201 / 42%), transparent 68%);
+}
+
+.login-cosmos__glow--violet {
+  right: -24%;
+  bottom: -28%;
+  background: radial-gradient(ellipse, rgb(89 70 180 / 34%), transparent 70%);
+  animation-delay: -12s;
+  animation-duration: 30s;
+}
+
+.login-cosmos__planet {
+  position: absolute;
+  top: 8%;
+  right: clamp(-10rem, -8vw, -3rem);
+  width: clamp(11rem, 27vw, 24rem);
+  aspect-ratio: 1;
+  border: 1px solid rgb(186 230 253 / 24%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgb(255 255 255 / 54%) 0 1%, transparent 15%),
+    radial-gradient(ellipse at 35% 35%, rgb(89 176 225 / 85%), rgb(29 76 139 / 95%) 43%, rgb(8 24 46 / 96%) 76%);
+  box-shadow: inset -1.5rem -1rem 2rem rgb(8 24 46 / 58%), 0 0 4rem rgb(38 135 201 / 18%);
+  opacity: 0.42;
+  animation: login-cosmos-drift 20s ease-in-out infinite alternate-reverse;
+}
+
+.login-cosmos__planet::after {
+  position: absolute;
+  inset: 27% -32%;
+  border: 1px solid rgb(157 234 255 / 55%);
+  border-right-color: rgb(157 234 255 / 12%);
+  border-left-color: rgb(157 234 255 / 12%);
+  border-radius: 50%;
+  content: "";
+  transform: rotate(-24deg);
+}
+
+.login-cosmos__shooting-star {
+  position: absolute;
+  top: 14%;
+  left: -12rem;
+  width: 10rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 85%), transparent);
+  opacity: 0;
+  transform: rotate(-25deg);
+  animation: login-shooting-star 13s ease-in infinite;
 }
 
 .construction-space::before,
@@ -247,6 +334,30 @@ input[type="date"].sp-field::-webkit-calendar-picker-indicator {
   }
 }
 
+@keyframes login-cosmos-drift {
+  to {
+    transform: translate3d(2rem, -1.5rem, 0) scale(1.08);
+  }
+}
+
+@keyframes login-shooting-star {
+  0%,
+  58% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(-25deg);
+  }
+
+  61% {
+    opacity: 0.8;
+  }
+
+  74%,
+  100% {
+    opacity: 0;
+    transform: translate3d(120vw, 35vh, 0) rotate(-25deg);
+  }
+}
+
 :focus-visible {
   outline: 3px solid var(--sp-color-data);
   outline-offset: 3px;
@@ -271,8 +382,18 @@ input[type="date"].sp-field::-webkit-calendar-picker-indicator {
   .construction-orbit,
   .construction-satellite,
   .not-found-flight,
+  .assistant-launcher,
   .construction-space::before,
-  .construction-space::after {
+  .construction-space::after,
+  .login-cosmos__glow,
+  .login-cosmos__planet,
+  .login-cosmos__shooting-star {
     animation: none !important;
+  }
+}
+
+@media (max-width: 479px) {
+  [role='dialog'][aria-label^='Asistente'] footer .grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

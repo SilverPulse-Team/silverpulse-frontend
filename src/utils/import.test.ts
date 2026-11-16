@@ -76,6 +76,20 @@ describe('parseJson', () => {
     expect(parsed.columns).toContain('metric_code')
   })
 
+  it('conserva source de un ImportRequest canónico sintético', () => {
+    const parsed = parseJson(JSON.stringify({ astronaut_id: 'AST-001', source: syntheticSource, observations: [] }))
+    expect(parsed.source).toEqual(syntheticSource)
+  })
+
+  it('no inventa source para arreglos simples y rechaza fuentes inválidas o incoherentes', () => {
+    expect(parseJson(JSON.stringify([{ metric_code: 'heart_rate' }])).source).toBeUndefined()
+    const incoherent = parseJson(JSON.stringify({ source: { ...syntheticSource, is_synthetic: false }, observations: [{ metric_code: 'heart_rate' }] }))
+    expect(incoherent.source).toBeUndefined()
+    expect(incoherent.errors[0].code).toBe('INVALID_SOURCE')
+    const unknownKind = parseJson(JSON.stringify({ source: { ...syntheticSource, kind: 'satellite' }, observations: [{ metric_code: 'heart_rate' }] }))
+    expect(unknownKind.errors[0].code).toBe('INVALID_SOURCE')
+  })
+
   it('rechaza JSON inválido y formas sin arreglo de observaciones', () => {
     expect(parseJson('{').errors[0].code).toBe('INVALID_JSON')
     expect(parseJson('{"metric_code":"heart_rate"}').errors[0].code).toBe('INVALID_JSON_SHAPE')

@@ -1,30 +1,30 @@
-# Preparación para integración frontend–FastAPI
+# Integración frontend–FastAPI
 
-## Fase actual: solo MOCK
+## Estado
 
-Esta fase frontend usa exclusivamente los snapshots oficiales del contrato
-v0.2.0. `getDataProvider()` resuelve a mock por defecto y `.env.example` define
-`VITE_DATA_PROVIDER=mock`. No cambiarlo a `http`, no iniciar llamadas a una API
-real y no usar las rutas de este documento como funcionalidad disponible.
+La integración HTTP con FastAPI v0.2.0 está implementada y se verificó de
+extremo a extremo con datos sintéticos en un directorio SQLite aislado. El
+proveedor predeterminado es HTTP: `getDataProvider()` no cambia a fixtures si
+FastAPI falla y `.env.example` conserva `VITE_DATA_PROVIDER=http`.
 
-El proveedor HTTP, sus parsers y las pruebas con `fetch` simulado se mantienen
-como preparación; las pruebas no conectan con FastAPI.
+La configuración HTTP es local y opt-in. No se incluyen credenciales en el
+frontend y la aplicación no accede directamente a archivos `.db`.
 
-## Configuración reservada para una fase futura
+## Configuración local HTTP
 
-Solo después de confirmar FastAPI y aprobar la integración se podría configurar
-`.env.local` con:
+Para usar una instancia FastAPI local, crea o edita `.env.local` (ignorado por
+Git):
 
 ```env
 VITE_DATA_PROVIDER=http
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-El contrato esperado es SilverPulse OpenAPI v0.2.0. FastAPI debe responder a
-`GET /health`, servir `/docs` o `/openapi.json` y permitir CORS para
-`http://localhost:5173`, métodos `GET`, `POST`, `OPTIONS` y el header
-`Content-Type`. El CORS debe configurarse en FastAPI, no desactivarse en el
-navegador.
+Inicia el backend con el contrato SilverPulse v0.2.0 y permite CORS para
+`http://localhost:5173` en FastAPI; no desactives CORS en el navegador. Las
+variables `VITE_*` se publican en el bundle y no deben contener secretos.
+`GET /health` indica que la API responde, no que el enlace simulado esté online;
+el estado del enlace se obtiene de `GET /simulator/status`.
 
 ## Rutas consumidas por el proveedor HTTP
 
@@ -33,6 +33,7 @@ navegador.
 | Catálogo y carga de importación | `GET /catalog/metrics`, `GET /ship/astronauts` |
 | Overview, tendencias y readiness | `GET /ship/astronauts/{id}/overview`, `/baselines`, `/trends`, `/return-readiness` |
 | Observaciones e importación | `GET /ship/observations`, `POST /ship/observations`, `POST /ship/observations/import` |
+| Decision 1 + Zoeh | `POST/GET /ship/analyses`, `GET /ship/analyses/{id}`, `PATCH .../answers`, `POST .../refresh`, `POST .../run` |
 | Informes de nave e inbox | `GET /ship/reports`, `GET /ship/reports/{id}`, `POST /ship/reports/generate`, `GET /ship/inbox` |
 | Bandeja y revisión en Tierra | `GET /earth/reports`, `GET /earth/reports/{id}`, `POST /earth/reports/{id}/review` |
 | Mission Control | `GET /simulator/status`, `GET /simulator/metrics`, `POST /simulator/config`, `POST /simulator/step` |
@@ -42,23 +43,37 @@ respuestas con parsers del contrato. Nave y Tierra consultan sus propios
 endpoints; el navegador no accede directamente a archivos `.db`. Los errores
 HTTP se conservan como errores de operación y no se convierten en éxito mock.
 
-## Preflight antes de declarar integración
+## Preflight verificado
 
-1. Iniciar FastAPI con la versión de contrato esperada.
-2. Confirmar `/docs` u `/openapi.json` y `GET /health`.
-3. Comparar requests/responses reales con `docs/contract.md`, los parsers y los
-   fixtures v0.2.0 antes de cambiar cualquiera de ellos.
-4. Verificar CORS desde el origen Vite y recorrer importación, lectura de nave,
-   reportes, simulador, bandeja Tierra y revisión.
-5. Registrar respuestas 404/409/422 y cualquier diferencia del YAML; no adaptar
-   datos silenciosamente ni suponer que un modo online implica entrega.
+La verificación local confirmó `GET /health`, `/docs` (HTTP 200), OpenAPI
+v0.2.0 con 30 rutas y preflight CORS desde `http://localhost:5173`. El catálogo
+de métricas devolvió 18 entradas.
 
-## Estado de verificación de este Epic
+Se importaron dos observaciones sintéticas (`heart_rate=71 bpm` y
+`sleep_duration=372 min`): el backend aceptó ambas y devolvió sus IDs. El
+dashboard y tendencias reflejaron los datos del proveedor HTTP; el dashboard
+se recargó desde el backend.
 
-No se ejecutaron solicitudes a un servidor FastAPI durante esta fase frontend.
-Por ello `/docs`, `/openapi.json`, `GET /health`, CORS y payloads reales siguen
-sin verificar. El proveedor HTTP existe como preparación, no como integración
-funcional habilitada.
+También se generó un informe a bordo con enlace offline. Tierra permaneció
+vacía hasta reconectar en modo delayed y avanzar el simulador; entonces
+`/earth/reports` confirmó la entrega. Se registró una revisión demo y se avanzó
+el simulador de nuevo hasta que `/ship/inbox` confirmó la respuesta de retorno.
+La secuencia y el estado de revisión persistieron después de recargar el
+navegador. Los resultados pertenecen a una ejecución local sintética, no son
+resultados clínicos ni una afirmación de rendimiento operacional.
+
+El backend completó sus 188 tests durante esta verificación. Ejecuta las
+pruebas, build y lint frontend indicados en el README para validar los cambios
+locales.
+
+## Alcance no cubierto
+
+No se modificó el repositorio backend. La demo no prueba autenticación,
+autorización, infraestructura espacial real, pérdida de ACK ni recuperación
+tras reinicio. El contrato tampoco ofrece un endpoint de reinicio, un listado
+independiente de paquetes ni un contador de reintentos; la UI no debe inferir
+esos estados. Registra cualquier futura diferencia 404/409/422 contra
+`docs/contract.md` y los parsers, sin adaptar datos silenciosamente.
 
 ## Entradas guiadas de IA: punto de integración futuro
 

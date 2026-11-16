@@ -1,14 +1,11 @@
 import {
-  Activity,
   ChartNoAxesCombined,
   ClipboardCheck,
-  FileText,
   FlaskConical,
   House,
   Inbox,
   Radio,
   Satellite,
-  Stethoscope,
   Upload,
   type LucideIcon,
 } from 'lucide-react'
@@ -19,6 +16,15 @@ export interface NavigationItem {
   label: string
   href: string
   icon: LucideIcon
+}
+
+export const demoRouteCapabilities = new Set([
+  '/astronaut', '/astronaut/import', '/astronaut/analysis', '/astronaut/trends', '/astronaut/return',
+  '/mission-control', '/medical', '/evidence',
+])
+
+export function enabledNavigation(items: NavigationItem[]) {
+  return items.filter((item) => demoRouteCapabilities.has(item.href.split('#')[0]))
 }
 
 interface EnvironmentConfig {
@@ -42,7 +48,6 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
       { label: 'Importar datos', href: '/astronaut/import', icon: Upload },
       { label: 'Tendencias', href: '/astronaut/trends', icon: ChartNoAxesCombined },
       { label: 'Preparación de retorno', href: '/astronaut/return', icon: ClipboardCheck },
-      { label: 'Informes', href: '/astronaut/reports/RPT-0001', icon: FileText },
       { label: 'Comunicaciones', href: '/mission-control', icon: Radio },
       ...sharedNavigation,
     ],
@@ -53,7 +58,6 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     profile: 'Médico Demo · CMO-DEMO',
     navigation: [
       { label: 'Bandeja médica', href: '/medical', icon: Inbox },
-      { label: 'Revisiones', href: '/medical/reports/RPT-0001', icon: Stethoscope },
       ...sharedNavigation,
     ],
   },
@@ -63,7 +67,6 @@ export const environmentConfig: Record<ShellEnvironment, EnvironmentConfig> = {
     profile: 'Mission Control · DEMO',
     navigation: [
       { label: 'Control de enlace', href: '/mission-control', icon: Satellite },
-      { label: 'Resumen de nave', href: '/astronaut', icon: Activity },
       ...sharedNavigation,
     ],
   },

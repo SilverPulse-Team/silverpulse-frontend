@@ -1,5 +1,7 @@
 import type {
   Astronaut,
+  AnalysisSession,
+  AnalysisSessionList,
   Baseline,
   CountermeasurePlan,
   EvaluationResult,
@@ -106,6 +108,27 @@ function objectOf(fields: Fields): Validator {
       }
       field.validator(record[key], `${path}.${key}`)
     }
+  }
+}
+
+function recordWith(fields: Fields): Validator {
+  return (value, path) => {
+    recordValue(value, path)
+    const record = value as Record<string, unknown>
+    for (const [key, field] of Object.entries(fields)) {
+      if (!(key in record)) {
+        if (field.optional) continue
+        fail(`${path}.${key}`, 'una propiedad requerida')
+      }
+      field.validator(record[key], `${path}.${key}`)
+    }
+  }
+}
+
+const stringRecord: Validator = (value, path) => {
+  recordValue(value, path)
+  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+    stringValue(item, `${path}.${key}`)
   }
 }
 
@@ -364,6 +387,62 @@ const evaluationRunResult = objectOf({
   metrics: required(recordValue),
 })
 
+const guidedQuestion = objectOf({
+  id: required(stringValue),
+  text: required(stringValue),
+  options: required(arrayOf(stringValue)),
+})
+
+const decisionReading = recordWith({
+  id: required(stringValue),
+  metric_code: required(stringValue),
+  value: required(nullable(numberValue)),
+  unit: required(stringValue),
+  observed_at_utc: required(stringValue),
+  quality: required(stringValue),
+  check: required(objectOf({ status: required(oneOf('reliable', 'repeat', 'insufficient')), reason: required(stringValue) })),
+})
+
+const decisionOne = objectOf({
+  readings: required(arrayOf(decisionReading)),
+  reliable_count: required(integerValue),
+  unverified_count: required(integerValue),
+  missing_count: required(integerValue),
+  absent_metrics: required(arrayOf(stringValue)),
+  pending_questions: required(arrayOf(guidedQuestion)),
+  confirmed_answers: required(stringRecord),
+  repeat_resolutions: required(stringRecord),
+})
+
+const orchestratorSession = objectOf({
+  executed: required(booleanValue),
+  status: required(stringValue),
+  results: required(recordValue),
+  coverage: required(recordValue),
+  execution_mode: required(stringValue),
+  fallback_reason: required(nullable(stringValue)),
+  post_analysis_questions: optional(arrayOf(stringValue)),
+})
+
+const analysisSession = objectOf({
+  analysis_id: required(stringValue),
+  astronaut_id: required(stringValue),
+  date_utc: required(stringValue),
+  phase: required(missionPhase),
+  question: required(nullable(stringValue)),
+  status: required(oneOf('awaiting_answers', 'ready', 'completed', 'partial', 'insufficient_evidence', 'failed')),
+  created_at_utc: required(stringValue),
+  updated_at_utc: required(stringValue),
+  snapshot: required(objectOf({ hash: required(stringValue), revision: required(integerValue), observation_ids: required(arrayOf(stringValue)) })),
+  guided_questions: required(arrayOf(guidedQuestion)),
+  guided_answers: required(stringRecord),
+  decision1: required(decisionOne),
+  provenance: required(recordValue),
+  orchestrator: required(orchestratorSession),
+  post_analysis_questions: required(arrayOf(stringValue)),
+  limitations: required(arrayOf(stringValue)),
+})
+
 export const parseHealthStatus = parser<HealthStatus>(objectOf({
   status: required(stringValue),
   demo_mode: required(booleanValue),
@@ -395,3 +474,5 @@ export const parseSimulatorMetrics = parser<SimulatorMetrics>(simulatorMetrics)
 export const parseResearchSources = parser<ResearchSource[]>(arrayOf(researchSource))
 export const parseEvaluationResults = parser<EvaluationResult[]>(arrayOf(evaluationResult))
 export const parseEvaluationRunResult = parser<EvaluationRunResult>(evaluationRunResult)
+export const parseAnalysisSession = parser<AnalysisSession>(analysisSession)
+export const parseAnalysisSessionList = parser<AnalysisSessionList>(paginated(analysisSession))

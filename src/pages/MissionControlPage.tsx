@@ -16,6 +16,7 @@ import type {
   SimulatorStatus,
 } from '../types'
 import { createSubmissionLock } from '../utils/submissionLock'
+import type { ShellEnvironment } from '../components/layout/navigation'
 
 type RemoteState<T> =
   | { status: 'loading' }
@@ -30,7 +31,7 @@ function addConfirmedStage(current: ConfirmedDemoStage[], stage: ConfirmedDemoSt
   return current.includes(stage) ? current : [...current, stage]
 }
 
-export function MissionControlPage() {
+export function MissionControlPage({ environment = 'mission-control' }: { environment?: ShellEnvironment }) {
   const provider = getDataProvider()
   const [statusState, setStatusState] = useState<RemoteState<SimulatorStatus>>({ status: 'loading' })
   const [metricsState, setMetricsState] = useState<RemoteState<SimulatorMetrics>>({ status: 'loading' })
@@ -185,8 +186,8 @@ export function MissionControlPage() {
     <div className="mx-auto max-w-7xl space-y-5">
       <PageHeader
         eyebrow="Simulador local · SilverPulse Sync"
-        title="Mission Control"
-        description="Simulación local de enlace diferido — no es una red espacial real."
+        title={environment === 'ship' ? 'Comunicaciones' : 'Mission Control'}
+        description="Controla el enlace DEMO y sigue informes de nave, entregas a Tierra y respuestas recibidas."
         badge={topBadge}
       />
 
@@ -210,7 +211,7 @@ export function MissionControlPage() {
         )}
       </section>
 
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+      <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
         {statusState.status === 'ready' ? (
           <SimulatorControls
             key={`${statusState.data.mode}-${statusState.data.one_way_latency_simulated_s}-${statusState.data.time_acceleration}`}

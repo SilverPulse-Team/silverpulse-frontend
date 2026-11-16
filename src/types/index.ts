@@ -53,3 +53,11 @@ export type {
   SimulatorStatus,
   SimulatorStepInput,
 } from './simulator'
+export type {
+  AnalysisCreateInput,
+  AnalysisSession,
+  AnalysisSessionList,
+  AnalysisSessionStatus,
+  DecisionReading,
+  GuidedQuestion,
+} from './analyses'
